@@ -27,6 +27,8 @@ protein = defaultdict(list)
 
 organism_proteins_rows = {}
 
+print('Reading files...')
+
 with open(file_pfam_descriptions) as csv_file:
     csv_reader = csv.reader(csv_file, delimiter=',')
     for row in csv_reader:
@@ -39,16 +41,21 @@ with open(file_assignment_data_set) as csv_file:
             pfam[row[5]].append(row[4])
         organism.add(tuple(row[1:4]))
         organism_proteins[','.join(row[1:4])].append(row[0])
+        protein[row[0]] = [row[0], None]
 
 with open(file_assignment_data_sequences) as csv_file:
     csv_reader = csv.reader(csv_file, delimiter=',')
     for row in csv_reader:
         protein[row[0]] = row
 
+print('Importing DomainPfam')
+
 for key in pfam:
     row = DomainPfam.objects.create(
         domain_id=pfam[key][0], domain_description=pfam[key][1], domain_description2=pfam[key][2])
     row.save()
+
+print('Importing Organism')
 
 for val in organism:
     val_list = list(val)
@@ -58,9 +65,23 @@ for val in organism:
     row.save()
     key = ','.join(val_list)
     for protein_id in organism_proteins[key]:
-      organism_proteins_rows[protein_id] = row
+        organism_proteins_rows[protein_id] = row
+
+print('Importing Protein')
 
 for key in protein:
     row = Protein.objects.create(
         protein_id=key, sequence=protein[key][1], organism=organism_proteins_rows[key])
     row.save()
+
+print('Importing ProteinDomainMapping')
+
+with open(file_assignment_data_set) as csv_file:
+    csv_reader = csv.reader(csv_file, delimiter=',')
+    for row in csv_reader:
+        ProteinDomainMapping.objects.create(
+            protein=Protein.objects.get(protein_id=row[0]),
+            domain=DomainPfam.objects.get(domain_id=row[5]),
+            start=row[6],
+            end=row[7]
+        )
