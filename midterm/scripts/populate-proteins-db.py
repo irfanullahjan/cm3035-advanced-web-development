@@ -71,7 +71,7 @@ print('Importing Protein')
 
 for key in protein:
     row = Protein.objects.create(
-        protein_id=key, sequence=protein[key][1], organism=organism_proteins_rows[key])
+        protein_id=key, sequence=protein[key][1], taxonomy=organism_proteins_rows[key])
     row.save()
 
 print('Importing ProteinDomainMapping')

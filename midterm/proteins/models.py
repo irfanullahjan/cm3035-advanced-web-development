@@ -25,7 +25,7 @@ class DomainPfam(models.Model):
 class Protein(models.Model):
     protein_id = models.CharField(primary_key=True, max_length=256)
     sequence = models.TextField(blank=True, null=True)
-    organism = models.ForeignKey(Organism, on_delete=models.DO_NOTHING)
+    taxonomy = models.ForeignKey(Organism, on_delete=models.DO_NOTHING)
     domains = models.ManyToManyField(DomainPfam, through='ProteinDomainMapping')
 
     def __str__(self):
