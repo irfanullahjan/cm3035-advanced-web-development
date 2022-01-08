@@ -13,6 +13,7 @@ from proteins.models import *
 
 ProteinDomainMapping.objects.all().delete()
 Protein.objects.all().delete()
+DomainInstance.objects.all().delete()
 DomainPfam.objects.all().delete()
 Organism.objects.all().delete()
 
@@ -79,9 +80,13 @@ print('Importing ProteinDomainMapping')
 with open(file_assignment_data_set) as csv_file:
     csv_reader = csv.reader(csv_file, delimiter=',')
     for row in csv_reader:
+        domain_instance = DomainInstance.objects.create(
+            start=row[6],
+            end=row[7],
+            pfam_id=DomainPfam.objects.get(domain_id=row[5]),
+        )
+        domain_instance.save()
         ProteinDomainMapping.objects.create(
             protein=Protein.objects.get(protein_id=row[0]),
-            domain=DomainPfam.objects.get(domain_id=row[5]),
-            start=row[6],
-            end=row[7]
-        )
+            domain=domain_instance
+        ).save()
