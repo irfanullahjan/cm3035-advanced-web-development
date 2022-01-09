@@ -27,3 +27,8 @@ class PfamRetreiveSerializer(serializers.ModelSerializer):
     class Meta:
         model = Pfam
         fields = '__all__'
+
+class ProteinListByOrganismSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Protein
+        fields = ['protein_id']
