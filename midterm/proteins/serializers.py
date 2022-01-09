@@ -1,15 +1,15 @@
 from rest_framework import serializers
 from .models import *
 
-class DomainInstanceSerializer(serializers.ModelSerializer):
+class DomainSerializer(serializers.ModelSerializer):
     class Meta:
-        model = DomainInstance
+        model = Domain
         fields = ('pfam_id', 'description', 'start', 'stop')
         depth = 1
 
 class ProteinRetreiveSerializer(serializers.ModelSerializer):
     length = serializers.SerializerMethodField()
-    domains = DomainInstanceSerializer(many=True, read_only=True)
+    domains = DomainSerializer(many=True, read_only=True)
     class Meta:
         model = Protein
         fields = ('protein_id', 'sequence', 'taxonomy', 'length', 'domains')
@@ -23,7 +23,7 @@ class ProteinCreateSerializer(serializers.ModelSerializer):
         model = Protein
         fields = '__all__'
 
-class DomainPfamRetreiveSerializer(serializers.ModelSerializer):
+class PfamRetreiveSerializer(serializers.ModelSerializer):
     class Meta:
-        model = DomainPfam
+        model = Pfam
         fields = '__all__'

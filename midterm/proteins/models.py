@@ -11,7 +11,7 @@ class Organism(models.Model):
         return self.genus + " " + self.species
 
 
-class DomainPfam(models.Model):
+class Pfam(models.Model):
     domain_id = models.CharField(primary_key=True, max_length=256)
     domain_description = models.CharField(
         max_length=256, blank=False, null=False)
@@ -20,15 +20,15 @@ class DomainPfam(models.Model):
         return self.domain_id
 
 
-class DomainInstance(models.Model):
-    pfam_id = models.ForeignKey(DomainPfam, on_delete=models.DO_NOTHING)
+class Domain(models.Model):
+    pfam_id = models.ForeignKey(Pfam, on_delete=models.DO_NOTHING)
     description = models.CharField(
         max_length=256, blank=False, null=False)
     start = models.IntegerField(blank=False, null=False)
     stop = models.IntegerField(blank=False, null=False)
 
     def __str__(self):
-        return self.domain_id
+        return str(self.pfam_id)
 
 
 class Protein(models.Model):
@@ -36,7 +36,7 @@ class Protein(models.Model):
     sequence = models.TextField(blank=True, null=True)
     taxonomy = models.ForeignKey(Organism, blank=False, null=False, on_delete=models.DO_NOTHING)
     domains = models.ManyToManyField(
-        DomainInstance, through='ProteinDomainMapping')
+        Domain, through='ProteinDomainMapping')
 
     def __str__(self):
         return self.protein_id
@@ -45,7 +45,7 @@ class Protein(models.Model):
 class ProteinDomainMapping(models.Model):
     protein = models.ForeignKey(Protein, on_delete=models.DO_NOTHING)
     domain = models.ForeignKey(
-        DomainInstance, to_field='id', on_delete=models.DO_NOTHING)
+        Domain, to_field='id', on_delete=models.DO_NOTHING)
 
     def __str__(self):
-        return self.protein.protein_id + "," + self.domain.domain_id
+        return self.protein.protein_id + "," + str(self.domain.id)

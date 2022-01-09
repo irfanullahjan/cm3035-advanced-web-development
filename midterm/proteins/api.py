@@ -10,6 +10,6 @@ class ProteinCreate(generics.CreateAPIView):
     queryset = Protein.objects.all()
     serializer_class = ProteinCreateSerializer
 
-class DomainPfamRetreive(generics.RetrieveAPIView):
-    queryset = DomainPfam.objects.all()
-    serializer_class = DomainPfamRetreiveSerializer
+class PfamRetreive(generics.RetrieveAPIView):
+    queryset = Pfam.objects.all()
+    serializer_class = PfamRetreiveSerializer

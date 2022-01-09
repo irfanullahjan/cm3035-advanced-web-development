@@ -13,8 +13,8 @@ from proteins.models import *
 
 ProteinDomainMapping.objects.all().delete()
 Protein.objects.all().delete()
-DomainInstance.objects.all().delete()
-DomainPfam.objects.all().delete()
+Domain.objects.all().delete()
+Pfam.objects.all().delete()
 Organism.objects.all().delete()
 
 file_pfam_descriptions = dirname + '/scripts/data/pfam_descriptions.csv'
@@ -28,8 +28,6 @@ organism_proteins = defaultdict(list)
 protein = defaultdict(list)
 
 organism_proteins_rows = {}
-
-print('Reading files...')
 
 with open(file_pfam_descriptions) as csv_file:
     csv_reader = csv.reader(csv_file, delimiter=',')
@@ -48,14 +46,14 @@ with open(file_assignment_data_sequences) as csv_file:
     for row in csv_reader:
         protein[row[0]] = row
 
-print('Importing DomainPfam')
+print('Importing Pfam...')
 
 for key in pfam:
-    row = DomainPfam.objects.create(
+    row = Pfam.objects.create(
         domain_id=pfam[key][0], domain_description=pfam[key][1])
     row.save()
 
-print('Importing Organism')
+print('Importing Organism...')
 
 for val in organism:
     val_list = list(val)
@@ -67,21 +65,21 @@ for val in organism:
     for protein_id in organism_proteins[key]:
         organism_proteins_rows[protein_id] = row
 
-print('Importing Protein')
+print('Importing Protein...')
 
 for key in protein:
     row = Protein.objects.create(
         protein_id=key, sequence=protein[key][1], taxonomy=organism_proteins_rows[key])
     row.save()
 
-print('Importing ProteinDomainMapping')
+print('Importing Domain and mapping...')
 
 with open(file_assignment_data_set) as csv_file:
     csv_reader = csv.reader(csv_file, delimiter=',')
     for row in csv_reader:
-        domain_instance = DomainInstance.objects.create(
+        domain_instance = Domain.objects.create(
             description=row[4],
-            pfam_id=DomainPfam.objects.get(domain_id=row[5]),
+            pfam_id=Pfam.objects.get(domain_id=row[5]),
             start=row[6],
             stop=row[7],
         )
@@ -90,3 +88,5 @@ with open(file_assignment_data_set) as csv_file:
             protein=Protein.objects.get(protein_id=row[0]),
             domain=domain_instance
         ).save()
+
+print('Done!')
