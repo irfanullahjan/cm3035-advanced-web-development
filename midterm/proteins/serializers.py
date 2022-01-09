@@ -7,7 +7,7 @@ class DomainInstanceSerializer(serializers.ModelSerializer):
         fields = ('pfam_id', 'description', 'start', 'stop')
         depth = 1
 
-class ProteinSerializer(serializers.ModelSerializer):
+class ProteinRetreiveSerializer(serializers.ModelSerializer):
     length = serializers.SerializerMethodField()
     domains = DomainInstanceSerializer(many=True, read_only=True)
     class Meta:
@@ -18,7 +18,12 @@ class ProteinSerializer(serializers.ModelSerializer):
     def get_length(self, obj):
         return len(obj.sequence)
 
-class CreateProteinSerializer(serializers.ModelSerializer):
+class ProteinCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Protein
+        fields = '__all__'
+
+class DomainPfamRetreiveSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DomainPfam
         fields = '__all__'
