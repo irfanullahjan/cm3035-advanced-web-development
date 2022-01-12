@@ -10,4 +10,5 @@ urlpatterns = [
     path('api/protein/<protein_id>', api.ProteinDetail.as_view(), name='protein-detail'),
     path('api/proteins/<taxonomy>', api.ProteinListByOrganism.as_view(), name='protein-list-by-organism'),
     path('api/pfam/<domain_id>', api.PfamDetail.as_view(), name='domain-pfam-detail'),
+    path('api/pfams/<taxonomy>', api.PfamListByOrganism.as_view(), name='pfam-list-by-organism'),
 ]

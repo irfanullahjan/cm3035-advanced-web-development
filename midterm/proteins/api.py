@@ -27,3 +27,10 @@ class PfamDetail(generics.RetrieveAPIView):
     queryset = Pfam.objects.all()
     serializer_class = PfamRetreiveSerializer
     lookup_field = 'domain_id'
+
+class PfamListByOrganism(generics.ListAPIView):
+    serializer_class = PfamRetreiveSerializer
+
+    def get_queryset(self):
+        taxonomy = self.kwargs['taxonomy']
+        return Pfam.objects.filter(domain__protein__taxonomy=taxonomy);
