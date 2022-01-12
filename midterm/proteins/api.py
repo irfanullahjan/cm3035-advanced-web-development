@@ -26,4 +26,4 @@ class ProteinListByOrganism(generics.ListAPIView):
 class PfamDetail(generics.RetrieveAPIView):
     queryset = Pfam.objects.all()
     serializer_class = PfamRetreiveSerializer
-    lookup_field = 'pfam_id'
+    lookup_field = 'domain_id'
