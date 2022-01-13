@@ -34,3 +34,8 @@ class PfamListByOrganism(generics.ListAPIView):
     def get_queryset(self):
         taxonomy = self.kwargs['taxonomy']
         return Pfam.objects.filter(domain__protein__taxonomy=taxonomy);
+
+class ProteinDomainCoverage(generics.RetrieveAPIView):
+    queryset = Protein.objects.all()
+    serializer_class = ProteinDomainCoverageSerializer
+    lookup_field = 'protein_id'

@@ -32,3 +32,14 @@ class ProteinListByOrganismSerializer(serializers.ModelSerializer):
     class Meta:
         model = Protein
         fields = ['protein_id']
+
+class ProteinDomainCoverageSerializer(serializers.ModelSerializer):
+    coverage = serializers.SerializerMethodField()
+    class Meta:
+        model = Protein
+        fields = ['coverage']
+
+    def get_coverage(self, obj):
+        domains = Domain.objects.filter(protein=obj)
+        lengths = map(lambda x: len(x), domains)
+        return sum(lengths) / len(obj.sequence)

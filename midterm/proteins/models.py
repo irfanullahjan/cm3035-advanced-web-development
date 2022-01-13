@@ -29,6 +29,9 @@ class Domain(models.Model):
 
     def __str__(self):
         return str(self.pfam_id)
+    
+    def __len__ (self):
+        return self.stop - self.start
 
 
 class Protein(models.Model):
