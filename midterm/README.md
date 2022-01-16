@@ -50,3 +50,12 @@ GET  http://127.0.0.1:8000/api/pfams/[TAXA_ID]
 GET  http://127.0.0.1:8000/api/coverage/[PROTEIN_ID]
 ```
 
+## Tests
+
+Tests are located in `/midterm/proteins/model_factories.py` and `/midterm/proteins/tests.py`.
+
+To run these tests, navigated to `/midterm` in the OS terminal, and then run the following command:
+
+```bash
+python manage.py test
+```
