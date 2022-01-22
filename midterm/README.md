@@ -20,7 +20,7 @@ Or to only change the port:
 
 `python manage.py runserver 8080`
 
-The links in this guide assume port `8000` at `localhost` has been used. 
+The links in this guide assume port `8000` at `localhost` has been used.
 
 ### Admin
 
@@ -46,11 +46,13 @@ I imported the provided data into the following models/tables:
 1. Protein
 1. ProteinDomainMapping (exists solely to map domains to proteins)
 
-In order to ensure the data is normalized and miniminal redundant data is present in the tables, I separated out the organisms data into their own model: `Organism`. Since each `Protein` belongs to an organism, it uses a foreign key `taxonomy` to reference `Organsim` model.
+In order to ensure the data is normalized and miniminal redundant data is present in the tables, I separated out the organisms data into their own model: `Organism`. Since each `Protein` belongs to an organism, it uses a foreign key `taxonomy` to reference `Organsim` model. I noted that `length` property of `Protein` is computable doesn't need to be saved in the database table.
 
 I also separated out the `Domain` and `ProteinDomainMapping` tables because this way, the mapping table didn't have extra columns which would be tricky to include with the relations. Keeping the mapping table separate from the Domain data made the process really simple with Django rest framework doing the include resolution for us.
 
 I prefered to explicitly declare the primary keys for most of my tables because the IDs in Protein, Organism and Pfam table are already unique.
+
+I felt that domain `description` should belong to `Pfam` model and not `Domain` because it changes with Pfam ID and doesn't change with each Domain instance. However, I kept it with `Domain` just to conform with the coursework requirements. The data in `Domain` table is not therefore normalized.
 
 ## REST endpoints
 
@@ -58,14 +60,20 @@ I implemented the following REST endpoints
 
 ```
 POST http://127.0.0.1:8000/api/protein/
-GET  http://127.0.0.1:8000/api/protein/[PROTEIN_ID]
-GET  http://127.0.0.1:8000/api/pfam/[PFAM_ID]
-GET  http://127.0.0.1:8000/api/proteins/[TAXA_ID]
-GET  http://127.0.0.1:8000/api/pfams/[TAXA_ID]
-GET  http://127.0.0.1:8000/api/coverage/[PROTEIN_ID]
+GET  http://127.0.0.1:8000/api/protein/{protein_id}
+GET  http://127.0.0.1:8000/api/pfam/{pfam_id}
+GET  http://127.0.0.1:8000/api/proteins/{taxa_id}
+GET  http://127.0.0.1:8000/api/pfams/{taxa_id}
+GET  http://127.0.0.1:8000/api/coverage/{protein_id}
 ```
 
-I used Django Rest Framework to create the above endpoints and I was able to achieve the required functionality using the generic API views. In the following lines I briefly describe any notable features of my endpoints implementations.
+I used Django Rest Framework to create the above endpoints. Since the endpoints above are simple I didn't want to reinvent the wheel and I was able to achieve the required functionality using the generic API views that Django Rest Framework provides. In the following lines I briefly describe any notable features of my endpoints implementations:
+
+In `POST /api/protein/`, I create new proteins and accept basic properties such as `protein_id`, `sequence` and `taxonomy`. I don't create nested objects because I wanted to keep the API RESTful.
+
+In `GET /api/protien/{protein_id}`, I use generic `RetrieveAPIView` and in `ProteinRetreiveSerializer`, I compute the protein length using `len()` which I have overriden in `Protien` model and it simply calculates the number of characters in the protein `sequence` property. Also I used `DomainSerializer` to inline domains into protein and also use `depth = 1` in `Meta` which inlines `taxonomy`.
+
+Again, as I stated above, `protein.domains[].description` field is not normalized but only because I wanted to follow the coursework requirements. Ideally, this description will be better placed in `Pfam` table, even though we will end up with two description fields in `Pfam` table.
 
 ## Tests
 

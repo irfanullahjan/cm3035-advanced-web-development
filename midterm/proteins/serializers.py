@@ -5,7 +5,7 @@ class DomainSerializer(serializers.ModelSerializer):
     class Meta:
         model = Domain
         fields = ('pfam_id', 'description', 'start', 'stop')
-        depth = 1 # depth=1 means that the serializer will also serialize pfam_id
+        depth = 1 # depth=1 means that the serializer will inline pfam_id
 
 class ProteinRetreiveSerializer(serializers.ModelSerializer):
     length = serializers.SerializerMethodField()
@@ -13,11 +13,11 @@ class ProteinRetreiveSerializer(serializers.ModelSerializer):
     class Meta:
         model = Protein
         fields = ('protein_id', 'sequence', 'taxonomy', 'length', 'domains')
-        depth = 1 # depth=1 means that the serializer will also serialize taxonomy and domains
+        depth = 1 # depth=1 means that the serializer will inline taxonomy.
 
     # return the length of the protein sequence
     def get_length(self, obj):
-        return len(obj.sequence)
+        return len(obj)
 
 class ProteinCreateSerializer(serializers.ModelSerializer):
     class Meta:

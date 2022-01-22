@@ -44,6 +44,9 @@ class Protein(models.Model):
     def __str__(self):
         return self.protein_id
 
+    def __len__(self):
+        return len(self.sequence)
+
 
 class ProteinDomainMapping(models.Model):
     protein = models.ForeignKey(Protein, on_delete=models.DO_NOTHING)
