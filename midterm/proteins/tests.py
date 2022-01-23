@@ -1,13 +1,12 @@
 from django.urls import reverse
 
-from rest_framework.test import APIRequestFactory
 from rest_framework.test import APITestCase
 
 from .model_factories import *
 from .serializers import *
 
 
-class PfamTest(APITestCase):
+class PfamApiTests(APITestCase):
 
     pfam = None
 

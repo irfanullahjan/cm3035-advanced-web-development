@@ -45,4 +45,4 @@ class ProteinDomainCoverageSerializer(serializers.ModelSerializer):
         domains = Domain.objects.filter(protein=obj)
         # len has been overloaded on Domain model to return the length of the domain
         lengths = map(lambda x: len(x), domains)
-        return sum(lengths) / len(obj.sequence)
+        return sum(lengths) / len(obj)

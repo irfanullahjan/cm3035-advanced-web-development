@@ -2,7 +2,7 @@
 
 ## How to run the application?
 
-Python verson 3 is required to run this project. I tested it using Python version 3.9.6 so in case of any issue, please ensure Python version is up to date. I also used Python vitual environments to isolate the packages that the application relied on.
+Python version 3 is required to run this project. I tested it using Python version 3.9.6 so in case of any issue, please ensure Python version is up to date. I also used Python virtual environments to isolate the packages that the application relied on.
 
 In order to run the application, please perform the following actions and commands in your OS terminal in the given order:
 
@@ -26,6 +26,8 @@ The links in this guide assume port `8000` at `localhost` has been used.
 
 To login to Django admin, please go to [http://127.0.0.1:8000/admin](http://127.0.0.1:8000/admin) and login using username: `admin` and password: `admin`.
 
+In `/midterm/proteins/admin.py`, I have registered the Model classes with the Django Admin interface so that basic editing of the entities is possible in the Admin UI. I have also inlined protein domains with Protein.
+
 ## How to import data?
 
 All the migrations have been run and seed data preloaded in the included `db.sqlite3` file. However, if anything goes wrong, the data maybe reimported by taking the following steps:
@@ -36,7 +38,7 @@ All the migrations have been run and seed data preloaded in the included `db.sql
 1. Run `cd scripts`
 1. Run `python populate-proteins-db.py`
 
-## Models
+## Models and Serializers
 
 I imported the provided data into the following models/tables:
 
@@ -54,9 +56,11 @@ I prefered to explicitly declare the primary keys for most of my tables because 
 
 I felt that domain `description` should belong to `Pfam` model and not `Domain` because it changes with Pfam ID and doesn't change with each Domain instance. However, I kept it with `Domain` just to conform with the coursework requirements. The data in `Domain` table is not therefore normalized.
 
+The serializers code is really simple because they are based on `ModelSerializer` from Django Rest Framework, which is not a bad thing because they serve the purpose and there is no need to manually write our serializer methods if the generic ones meet our needs, which they do really well. I only needed to add a few simple custom fields to my serializers e.g. the `length` property and domain coverage property for protein.
+
 ## REST endpoints
 
-I implemented the following REST endpoints
+I implemented the following REST endpoints:
 
 ```
 POST http://127.0.0.1:8000/api/protein/
@@ -75,6 +79,14 @@ In `GET /api/protien/{protein_id}`, I use generic `RetrieveAPIView` and in `Prot
 
 Again, as I stated above, `protein.domains[].description` field is not normalized but only because I wanted to follow the coursework requirements. Ideally, this description will be better placed in `Pfam` table, even though we will end up with two description fields in `Pfam` table.
 
+In `GET /api/proteins/{taxa_id}`, even though the coursework example shows Django `id` in addition to `protein_id`, my endpoint only lists objects with protein ids because the table has protein ids as primary keys and doesn't use Django sequencial primary key. Also, this list would have been better done if the reponse was an array of protein ids instead of array of objects having protein ids, because the only property the objects have is `protein_id`.
+
+Similarly in endpoint `GET /api/pfams/{taxa_id}`, I didn't use Django sequencial ids as primary keys but instead used Pfam id, i.e. `domain_id` as the primary key because it is unique. Therefore, the response from this endpoint differs a bit from the coursework example because it doesn't have `id` field.
+
+To implement the endpoing `GET /api/pfams/{taxa_id}`, I overrode the `get_queryset()` method and I filter the Pfams using Django field lookups functionality with double underscores. This enabled me to get the Pfams that are related to proteins belonging to the given Organism identified by the `texa_id` (I have used keyword `taxonomy` in my code instead of `texa_id`).
+
+In the endpoint `GET /api/coverage/{protein_id}`, the domain coverage of the protein is calculated in `ProteinDomainCoverageSerializer` and I do this using `serializers.SerializerMethodField()` which is custom field named `coverage` and is computed in `get_coverage()`. In this method I filter the domains by the given protein and then I use `len()` method which I have overridden in `Domain` model and `Protein` model.
+
 ## Tests
 
 Tests are located in `/midterm/proteins/model_factories.py` and `/midterm/proteins/tests.py`.
@@ -84,3 +96,5 @@ To run these tests, navigated to `/midterm` in the OS terminal, and then run the
 ```bash
 python manage.py test
 ```
+
+In the tests classes, I have overriden `setUp()` and `tearDown()` methods from parent classes which ensures that the database is cleaned up before a different class of tests are run.
