@@ -29,15 +29,16 @@ class Domain(models.Model):
 
     def __str__(self):
         return str(self.pfam_id)
-    
-    def __len__ (self):
+
+    def __len__(self):
         return self.stop - self.start
 
 
 class Protein(models.Model):
     protein_id = models.CharField(primary_key=True, max_length=256)
     sequence = models.TextField(blank=True, null=True)
-    taxonomy = models.ForeignKey(Organism, blank=False, null=False, on_delete=models.DO_NOTHING)
+    taxonomy = models.ForeignKey(
+        Organism, blank=False, null=False, on_delete=models.DO_NOTHING)
     domains = models.ManyToManyField(
         Domain, through='ProteinDomainMapping')
 
@@ -45,7 +46,10 @@ class Protein(models.Model):
         return self.protein_id
 
     def __len__(self):
-        return len(self.sequence)
+        if self.sequence is not None:
+            return len(self.sequence)
+        else:
+            return 0
 
 
 class ProteinDomainMapping(models.Model):
