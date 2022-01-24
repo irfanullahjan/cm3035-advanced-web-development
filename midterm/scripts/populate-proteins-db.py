@@ -30,8 +30,13 @@ organism = set()
 organism_proteins = defaultdict(list)
 # Proteins to create
 protein = defaultdict(list)
+
 # key value pairs: protein -> organism row
 organism_proteins_rows = {}
+# protein rows
+protein_rows = {}
+# pfam rows
+pfam_rows = {}
 
 # Reading Pfam list
 with open(file_pfam_descriptions) as csv_file:
@@ -60,6 +65,7 @@ for key in pfam:
     row = Pfam.objects.create(
         domain_id=pfam[key][0], domain_description=pfam[key][1])
     row.save()
+    pfam_rows[key] = row
 
 print('Importing Organism...')
 
@@ -79,6 +85,7 @@ for key in protein:
     row = Protein.objects.create(
         protein_id=key, sequence=protein[key][1], taxonomy=organism_proteins_rows[key])
     row.save()
+    protein_rows[key] = row
 
 print('Importing Domain and mapping proteins to domains...')
 
@@ -87,13 +94,13 @@ with open(file_assignment_data_set) as csv_file:
     for row in csv_reader:
         domain_instance = Domain.objects.create(
             description=row[4],
-            pfam_id=Pfam.objects.get(domain_id=row[5]),
+            pfam_id=pfam_rows[row[5]],
             start=int(row[6]),
             stop=int(row[7]),
         )
         domain_instance.save()
         ProteinDomainMapping.objects.create(
-            protein=Protein.objects.get(protein_id=row[0]),
+            protein=protein_rows[row[0]],
             domain=domain_instance
         ).save()
 
