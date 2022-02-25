@@ -1,13 +1,6 @@
-import {
-  Col,
-  Container,
-  Nav,
-  Navbar,
-  NavItem,
-  Row,
-} from 'react-bootstrap';
-import { NavbarTop } from './NavbarTop';
-import Link from 'next/link';
+import { Col, Container, Nav, Navbar, NavItem, Row } from "react-bootstrap";
+import { NavbarTop } from "./NavbarTop";
+import Link from "next/link";
 
 type Props = {
   children: JSX.Element;
@@ -16,7 +9,7 @@ type Props = {
 export function Layout(props: Props) {
   const { children } = props;
   return (
-    <>
+    <div id="circle-app-root">
       <div className="bg-dark">
         <Container>
           <Row>
@@ -26,7 +19,7 @@ export function Layout(props: Props) {
           </Row>
         </Container>
       </div>
-      <div style={{ flex: '1 0 auto' }}>
+      <div style={{ flex: "1 0 auto" }}>
         <Container>
           <Row>
             <Col>{children}</Col>
@@ -43,14 +36,12 @@ export function Layout(props: Props) {
                     <Link href="/about">About</Link>
                   </NavItem>
                 </Nav>
-                <span>
-                  &copy; EasyHomes {new Date().getFullYear()}
-                </span>
+                <span>&copy; Circle {new Date().getFullYear()}</span>
               </Navbar>
             </Col>
           </Row>
         </Container>
       </div>
-    </>
+    </div>
   );
 }

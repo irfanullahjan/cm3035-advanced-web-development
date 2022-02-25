@@ -1,0 +1,10 @@
+@import "~bootstrap/scss/bootstrap";
+
+// makes footer stick to the bottom of the page if content is shorter than the window
+div#circle-app-root {
+  min-height: 100vh;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
