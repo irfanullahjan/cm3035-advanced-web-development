@@ -4,7 +4,8 @@ from rest_framework import generics
 from django.contrib.auth import get_user_model, authenticate
 from django.views.decorators.csrf import csrf_exempt
 
-from .serializers import UserSerializer
+from .serializers import PostSerializer, UserSerializer
+from .models import *
 
 
 class CreateUserView(generics.CreateAPIView):
@@ -46,3 +47,36 @@ class CurrentUserView(generics.RetrieveAPIView):
     def get_object(self):
         return self.request.user
 
+class UserById(generics.RetrieveAPIView):
+    model = get_user_model()
+    permission_classes = [
+        # only authenticated users have user details
+        permissions.IsAuthenticated
+    ]
+    serializer_class = UserSerializer
+
+    def get_object(self):
+        return get_user_model().objects.get(id=self.kwargs['id'])
+
+class UserPosts(generics.ListAPIView):
+    model = Post
+    permission_classes = [
+        # only authenticated users have user details
+        permissions.IsAuthenticated
+    ]
+    serializer_class = PostSerializer
+
+    def get_object(self):
+        return Post.objects.filter(user_id=self.kwargs['id'])
+
+class CreatePost(generics.CreateAPIView):
+    model = Post
+    permission_classes = [
+        # only authenticated users have user details
+        permissions.IsAuthenticated
+    ]
+    serializer_class = PostSerializer
+
+    # add user_id to post
+    def perform_create(self, serializer):
+        serializer.save(user_id=self.request.user)

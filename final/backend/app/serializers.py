@@ -1,7 +1,9 @@
 from rest_framework import serializers
-from django.contrib.auth import get_user_model # If used custom user model
+from django.contrib.auth import get_user_model  # If used custom user model
+from .models import *
 
 UserModel = get_user_model()
+
 
 class UserSerializer(serializers.ModelSerializer):
 
@@ -21,4 +23,16 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = UserModel
+        fields = '__all__'
+
+
+class PostSerializer(serializers.ModelSerializer):
+
+    user_id = serializers.PrimaryKeyRelatedField(
+        read_only=True, default=serializers.CurrentUserDefault())
+
+    username = serializers.CharField(source='user_id.username', read_only=True)
+
+    class Meta:
+        model = Post
         fields = '__all__'
