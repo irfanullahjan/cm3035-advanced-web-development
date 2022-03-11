@@ -12,4 +12,5 @@ urlpatterns = [
     path('api/user/token/verify', TokenVerifyView.as_view(), name='token_verify'),
     path('api/user/current', api.CurrentUserView.as_view(), name='current_user'),
     path('api/user/signup', api.CreateUserView.as_view(), name='user-signup'),
+    path('api/user/login', api.AuthenticateUser.as_view(), name='user-login'),
 ]

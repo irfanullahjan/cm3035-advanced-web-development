@@ -18,5 +18,4 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = UserModel
-        # Tuple of serialized model fields (see link [2])
-        fields = ( "id", "username", "password", )
+        fields = ( "id", "username", "password")

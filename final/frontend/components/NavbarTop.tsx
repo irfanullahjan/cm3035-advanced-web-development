@@ -50,11 +50,6 @@ export const NavbarTop = () => {
                     <NavLink>New</NavLink>
                   </Link>
                 </NavItem>
-                <NavItem>
-                  <Link href={`/user/${user.id}`} passHref>
-                    <NavLink>My properties</NavLink>
-                  </Link>
-                </NavItem>
                 {user?.realm === 'admin' && (
                   <>
                     <NavItem>
@@ -86,7 +81,7 @@ export const NavbarTop = () => {
                   </Link>
                 </NavItem>
                 <NavItem>
-                  <Link href="/">
+                  <Link href="/" passHref>
                     <NavLink
                       onClick={handleLogout}
                       style={{ cursor: 'pointer' }}>

@@ -9,7 +9,6 @@ export const SessionContext = createContext<any>(null);
 
 function MyApp({ Component, pageProps }: AppProps) {
   const [user, userLoading, updateSession] = useSession();
-
   if (userLoading) return <Spinner />;
   return (
     <SessionContext.Provider value={{ user, updateSession }}>

@@ -1,13 +1,12 @@
+import { Form, FormikErrors, FormikProvider, useFormik } from "formik";
+import { useRouter } from "next/dist/client/router";
+import { useContext, useState } from "react";
+import { Button, Spinner } from "reactstrap";
+import { InputText } from "~components/InputText";
+import { SessionContext } from "~pages/_app";
+import { ACCESS_TOKEN } from "~utils/useSession";
 
-import { Form, FormikErrors, FormikProvider, useFormik } from 'formik';
-import { useRouter } from 'next/dist/client/router';
-import { useContext, useState } from 'react';
-import { Button, Spinner } from 'reactstrap';
-import { InputText } from '~components/InputText';
-import { SessionContext } from '~pages/_app';
-import { ACCESS_TOKEN } from '~utils/useSession';
-
-const title = 'Login to Circle';
+const title = "Login to Circle";
 
 export default function Login() {
   const { user, updateSession } = useContext(SessionContext);
@@ -23,16 +22,16 @@ export default function Login() {
     password: string;
   }>({
     initialValues: {
-      username: '',
-      password: '',
+      username: "",
+      password: "",
     },
-    onSubmit: async values => {
+    onSubmit: async (values) => {
       setFormFeedback(undefined);
       try {
-        const res = await fetch('/api/user/token', {
-          method: 'POST',
+        const res = await fetch("/api/user/token", {
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
           body: JSON.stringify(values),
         });
@@ -40,14 +39,14 @@ export default function Login() {
         if (authJson.access && authJson.refresh) {
           localStorage.setItem(ACCESS_TOKEN, authJson.access);
           setFormFeedback({
-            accent: 'success',
-            message: 'Login successful. Redirecting you to home page.',
+            accent: "success",
+            message: "Login successful. Redirecting you to home page.",
           });
         } else if (res.status === 401) {
           setFormFeedback({
-            accent: 'danger',
+            accent: "danger",
             message:
-              'Login failed. Please retry with correct email and password.',
+              "Login failed. Please retry with correct email and password.",
           });
           console.error(res);
         } else {
@@ -55,20 +54,20 @@ export default function Login() {
         }
       } catch (err) {
         setFormFeedback({
-          accent: 'danger',
-          message: 'Login failed due to a network or server issue.',
+          accent: "danger",
+          message: "Login failed due to a network or server issue.",
         });
         console.error(err);
       }
       updateSession();
     },
-    validate: values => {
+    validate: (values) => {
       const errors: FormikErrors<typeof values> = {};
       if (!values.username) {
-        errors.username = 'Username is required';
+        errors.username = "Username is required";
       }
       if (!values.password) {
-        errors.password = 'Password is required';
+        errors.password = "Password is required";
       }
       return errors;
     },
@@ -77,11 +76,11 @@ export default function Login() {
   if (user) {
     if (!formFeedback) {
       setFormFeedback({
-        accent: 'info',
-        message: 'You are already logged in. Redirecting you to home page.',
+        accent: "info",
+        message: "You are already logged in. Redirecting you to home page.",
       });
     }
-    setTimeout(() => router.push('/'), 1000);
+    setTimeout(() => router.push("/"), 1000);
   }
 
   return (
@@ -91,11 +90,7 @@ export default function Login() {
       <FormikProvider value={formik}>
         <Form>
           <InputText name="username" label="Username" />
-          <InputText
-            type="password"
-            name="password"
-            label="Password"
-          />
+          <InputText type="password" name="password" label="Password" />
           <Button type="submit" color="primary">
             Login {formik.isSubmitting && <Spinner size="sm" color="light" />}
           </Button>
