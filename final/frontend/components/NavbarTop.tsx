@@ -12,6 +12,7 @@ import {
 } from 'reactstrap';
 import { SessionContext } from '~pages/_app';
 import { useRouter } from 'next/dist/client/router';
+import { ACCESS_TOKEN } from '~utils/useSession';
 
 export const NavbarTop = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -25,7 +26,7 @@ export const NavbarTop = () => {
   const handleLogout = (event: any) => {
     if (confirm('Are you sure you want to logout?')) {
       event.preventDefault();
-      localStorage.removeItem('jwt');
+      localStorage.removeItem(ACCESS_TOKEN);
       updateSession();
       router.push('/');
     }
@@ -37,7 +38,7 @@ export const NavbarTop = () => {
         <NavbarBrand
           onClick={() => router.push('/')}
           style={{ cursor: 'pointer' }}>
-          EasyHomes
+          Circle
         </NavbarBrand>
         <NavbarToggler onClick={toggle} />
         <Collapse isOpen={isOpen} navbar>
@@ -97,7 +98,7 @@ export const NavbarTop = () => {
             ) : (
               <>
                 <NavItem>
-                  <Link href="/signup" passHref>
+                  <Link href="/user/signup" passHref>
                     <NavLink>Signup</NavLink>
                   </Link>
                 </NavItem>

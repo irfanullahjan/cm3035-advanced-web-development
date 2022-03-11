@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
 
+export const ACCESS_TOKEN = 'accessToken';
+
 export function useSession() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
   const loadSession = async () => {
-    const ACCESS_TOKEN = 'accessToken';
     const jwt = localStorage.getItem(ACCESS_TOKEN);
     if (jwt) {
       const res = await fetch('/api/user/current', {

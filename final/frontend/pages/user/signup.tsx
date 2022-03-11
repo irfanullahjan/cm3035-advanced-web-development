@@ -5,49 +5,54 @@ import { useContext, useState } from 'react';
 import { Button, Spinner } from 'reactstrap';
 import { InputText } from '~components/InputText';
 import { SessionContext } from '~pages/_app';
-import { ACCESS_TOKEN } from '~utils/useSession';
 
-const title = 'Login to Circle';
+const title = 'Sign up for a Circle account';
 
-export default function Login() {
-  const { user, updateSession } = useContext(SessionContext);
+export default function Signup() {
+  const { user } = useContext(SessionContext);
+  const router = useRouter();
   const [formFeedback, setFormFeedback] = useState<{
     accent: string;
     message: string;
   }>();
 
-  const router = useRouter();
-
   const formik = useFormik<{
-    username: string;
-    password: string;
+    username?: string;
+    email?: string;
+    password?: string;
+    verifyPassword?: string;
   }>({
     initialValues: {
       username: '',
+      email: '',
       password: '',
+      verifyPassword: '',
     },
     onSubmit: async values => {
       setFormFeedback(undefined);
       try {
-        const res = await fetch('/api/user/token', {
+        const formData = {
+          ...values,
+        };
+        delete formData.verifyPassword;
+        const res = await fetch('/api/user/signup', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify(values),
+          body: JSON.stringify(formData),
         });
-        const authJson = await res.json();
-        if (authJson.access && authJson.refresh) {
-          localStorage.setItem(ACCESS_TOKEN, authJson.access);
+        if (res.status === 201) {
           setFormFeedback({
             accent: 'success',
-            message: 'Login successful. Redirecting you to home page.',
+            message: 'Signup successful. Redirecting you to login page.',
           });
-        } else if (res.status === 401) {
+          setTimeout(() => router.push('/user/login'), 1000);
+        } else if (res.status === 400) {
           setFormFeedback({
             accent: 'danger',
             message:
-              'Login failed. Please retry with correct email and password.',
+              'Signup failed. Please retry with a different email or username.',
           });
           console.error(res);
         } else {
@@ -56,19 +61,26 @@ export default function Login() {
       } catch (err) {
         setFormFeedback({
           accent: 'danger',
-          message: 'Login failed due to a network or server issue.',
+          message: 'Signup failed due to a network or server issue.',
         });
         console.error(err);
       }
-      updateSession();
     },
     validate: values => {
-      const errors: FormikErrors<typeof values> = {};
+      let errors: FormikErrors<typeof values> = {};
       if (!values.username) {
         errors.username = 'Username is required';
       }
+      if (!values.email) {
+        errors.email = 'Email is required';
+      }
       if (!values.password) {
         errors.password = 'Password is required';
+      } else if (values.password.length < 8) {
+        errors.password = 'Password must be at least 8 characters';
+      }
+      if (values.verifyPassword !== values.password) {
+        errors.verifyPassword = "Passwords don't match";
       }
       return errors;
     },
@@ -86,18 +98,26 @@ export default function Login() {
 
   return (
     <>
-      <h1>Login</h1>
-      <p>Please enter your credentials to login.</p>
+      <h1>Signup</h1>
+      <p>Please enter the following details to sign up for a Circle account.</p>
       <FormikProvider value={formik}>
         <Form>
-          <InputText name="username" label="Username" />
+          <InputText type="text" name="username" label="Username" />
+          <InputText type="email" name="email" label="Email" />
           <InputText
             type="password"
             name="password"
             label="Password"
+            minLength={8}
+          />
+          <InputText
+            type="password"
+            name="verifyPassword"
+            label="Verify Password"
+            minLength={8}
           />
           <Button type="submit" color="primary">
-            Login {formik.isSubmitting && <Spinner size="sm" color="light" />}
+            Signup {formik.isSubmitting && <Spinner size="sm" color="light" />}
           </Button>
           {formFeedback && (
             <p className={`text-${formFeedback.accent} mt-3`}>
@@ -110,4 +130,4 @@ export default function Login() {
   );
 }
 
-Login.title = title;
+Signup.title = title;

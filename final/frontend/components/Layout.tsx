@@ -34,24 +34,6 @@ export function Layout(props: Props) {
           </Row>
         </Container>
       </div>
-      <div className="bg-dark text-secondary" style={{ flexShrink: 0 }}>
-        <Container>
-          <Row>
-            <Col>
-              <Navbar>
-                <Nav navbar>
-                  <NavItem>
-                    <Link href="/about">About</Link>
-                  </NavItem>
-                </Nav>
-                <NavbarText>
-                  &copy; EasyHomes {new Date().getFullYear()}
-                </NavbarText>
-              </Navbar>
-            </Col>
-          </Row>
-        </Container>
-      </div>
     </>
   );
 }
