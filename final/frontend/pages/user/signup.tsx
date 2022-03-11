@@ -18,12 +18,16 @@ export default function Signup() {
 
   const formik = useFormik<{
     username?: string;
+    first_name?: string;
+    last_name?: string;
     email?: string;
     password?: string;
     verifyPassword?: string;
   }>({
     initialValues: {
       username: '',
+      first_name: '',
+      last_name: '',
       email: '',
       password: '',
       verifyPassword: '',
@@ -71,6 +75,12 @@ export default function Signup() {
       if (!values.username) {
         errors.username = 'Username is required';
       }
+      if (!values.first_name) {
+        errors.first_name = 'First name is required';
+      }
+      if (!values.last_name) {
+        errors.last_name = 'Last name is required';
+      }
       if (!values.email) {
         errors.email = 'Email is required';
       }
@@ -103,6 +113,8 @@ export default function Signup() {
       <FormikProvider value={formik}>
         <Form>
           <InputText type="text" name="username" label="Username" />
+          <InputText type="text" name="first_name" label="First name" />
+          <InputText type="text" name="last_name" label="Last Name" />
           <InputText type="email" name="email" label="Email" />
           <InputText
             type="password"

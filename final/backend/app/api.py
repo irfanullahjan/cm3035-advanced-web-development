@@ -14,6 +14,7 @@ class CreateUserView(generics.CreateAPIView):
         permissions.AllowAny # Or anon users can't register
     ]
     serializer_class = UserSerializer
+    fields = '__all__'
 
 # authenticate a user
 class AuthenticateUser(generics.CreateAPIView):
