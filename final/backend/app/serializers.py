@@ -4,12 +4,11 @@ from .models import *
 
 UserModel = get_user_model()
 
-# UserProfile Serializer
-
-
 class ProfileSerializer(serializers.ModelSerializer):
 
     birthday = serializers.DateField(format="%Y-%m-%d")
+
+    # setting to read only to pass validation coz user will be poppulated once created
     user = serializers.PrimaryKeyRelatedField(read_only=True)
 
     class Meta:

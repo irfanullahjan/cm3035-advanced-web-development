@@ -13,9 +13,15 @@ class Post(models.Model):
 
 # User's Profile model
 class Profile(models.Model):
+    GENDER_CHOICES = [
+        ('M', 'Male'),
+        ('F', 'Female'),
+        ('O', 'Other')
+    ]
     user = models.OneToOneField(get_user_model(), on_delete=models.CASCADE)
     friends = models.ManyToManyField('self', blank=True)
-    birthday = models.DateField(null=False, blank=False)
+    birthday = models.DateField(null=True, blank=True)
+    gender = models.CharField(max_length=1, choices=GENDER_CHOICES, blank=True, null=True)
 
     def __str__(self):
         return self.user.username

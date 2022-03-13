@@ -1,10 +1,9 @@
 import { useRouter } from "next/router";
 import { useContext, useEffect, useState } from "react";
-import useSWR from "swr";
-import { fetcher } from "~utils/fetcher";
 import { SessionContext } from "~pages/_app";
 import Error from "next/error";
 import { Table } from "reactstrap";
+import { getAgeInYears } from "~utils/getAgeInYears";
 
 const title = "User Profile";
 
@@ -14,7 +13,7 @@ export default function Profile() {
   const router = useRouter();
   const { id } = router.query;
 
-  const [profile, setProfile] = useState<any>(null);
+  const [userDetail, setUserDetail] = useState<any>(null);
 
   useEffect(() => {
     if (id && user) {
@@ -26,7 +25,7 @@ export default function Profile() {
       })
         .then((res) => res.json())
         .then((data) => {
-          setProfile(data);
+          setUserDetail(data);
         });
     }
   }, [id, user, user?.token]);
@@ -42,33 +41,33 @@ export default function Profile() {
   return (
     <>
       <h1>Profile</h1>
-      {profile && (
+      {userDetail && (
         <Table>
           <tbody>
             <tr>
               <td>User ID</td>
-              <td>{profile.id}</td>
+              <td>{userDetail.id}</td>
             </tr>
             <tr>
               <td>Username</td>
-              <td>{profile.username}</td>
+              <td>{userDetail.username}</td>
             </tr>
             <tr>
               <td>Email</td>
-              <td>{profile.email}</td>
+              <td>{userDetail.email}</td>
             </tr>
             <tr>
-              <td>First Name</td>
-              <td>{profile.first_name}</td>
+              <td>Name</td>
+              <td>{`${userDetail.first_name} ${userDetail.last_name}`}</td>
             </tr>
             <tr>
-              <td>Last Name</td>
-              <td>{profile.last_name}</td>
+              <td>Age</td>
+              <td>{getAgeInYears(userDetail.profile?.birthday)}</td>
             </tr>
           </tbody>
         </Table>
       )}
-      {profile?.id === user.id && (
+      {userDetail?.id === user.id && (
         <>
           <h2>My Posts</h2>
         </>
