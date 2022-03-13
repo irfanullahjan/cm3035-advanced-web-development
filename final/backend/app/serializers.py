@@ -25,8 +25,6 @@ class UserSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         profile_data = validated_data.pop('profile')
         user = UserModel.objects.create(**validated_data)
-        print('profile_data', profile_data)
-        print('user', user)
         Profile.objects.create(user=user, **profile_data)
         return user
 

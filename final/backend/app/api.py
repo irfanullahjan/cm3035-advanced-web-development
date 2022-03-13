@@ -56,6 +56,19 @@ class UserById(generics.RetrieveAPIView):
     def get_object(self):
         return get_user_model().objects.get(id=self.kwargs['id'])
 
+class FindUsersByUsername(generics.ListAPIView):
+    model = get_user_model()
+    permission_classes = [
+        # only authenticated users have user details
+        permissions.IsAuthenticated
+    ]
+    serializer_class = UserSerializer
+
+    def get_queryset(self):
+        search_text = self.kwargs['search_text']
+        print('search_text', search_text)
+        return get_user_model().objects.filter(username__icontains=search_text)
+
 class UserPosts(generics.ListAPIView):
     model = Post
     permission_classes = [

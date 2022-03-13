@@ -49,6 +49,11 @@ export const NavbarTop = () => {
                   <NavLink>Lobby</NavLink>
                 </Link>
               </NavItem>
+              <NavItem>
+                <Link href="/friends" passHref>
+                  <NavLink>Friends</NavLink>
+                </Link>
+              </NavItem>
             </>
           )}
         </Nav>
