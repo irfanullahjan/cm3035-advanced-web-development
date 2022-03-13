@@ -6,8 +6,8 @@ interface Props extends InputProps {
   name: string;
 }
 
-export function InputText(props: Props) {
-  const { label, name, type, ...otherProps } = props;
+export function FormikInput(props: Props) {
+  const { label, name, type, options, ...otherProps } = props;
   const [{ value, ...field }, meta] = useField(name);
 
   const invalid = meta.touched && meta.error;

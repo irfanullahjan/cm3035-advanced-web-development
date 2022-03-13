@@ -2,7 +2,6 @@ from django.http import JsonResponse
 from rest_framework import permissions
 from rest_framework import generics
 from django.contrib.auth import get_user_model, authenticate
-from django.views.decorators.csrf import csrf_exempt
 
 from .serializers import PostSerializer, UserSerializer
 from .models import *
@@ -24,7 +23,6 @@ class AuthenticateUser(generics.CreateAPIView):
     ]
     serializer_class = UserSerializer
 
-    @csrf_exempt
     def post(self, request):
         username = request.data.get("username")
         password = request.data.get("password")

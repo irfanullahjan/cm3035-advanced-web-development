@@ -4,21 +4,31 @@ from .models import *
 
 UserModel = get_user_model()
 
+# UserProfile Serializer
+
+
+class ProfileSerializer(serializers.ModelSerializer):
+
+    birthday = serializers.DateField(format="%Y-%m-%d")
+    user = serializers.PrimaryKeyRelatedField(read_only=True)
+
+    class Meta:
+        model = Profile
+        fields = '__all__'
+
 
 class UserSerializer(serializers.ModelSerializer):
 
     password = serializers.CharField(write_only=True)
 
+    profile = ProfileSerializer()
+
     def create(self, validated_data):
-
-        user = UserModel.objects.create_user(
-            username=validated_data['username'],
-            password=validated_data['password'],
-            email=validated_data['email'],
-            first_name=validated_data['first_name'],
-            last_name=validated_data['last_name']
-        )
-
+        profile_data = validated_data.pop('profile')
+        user = UserModel.objects.create(**validated_data)
+        print('profile_data', profile_data)
+        print('user', user)
+        Profile.objects.create(user=user, **profile_data)
         return user
 
     class Meta:

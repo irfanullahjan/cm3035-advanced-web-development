@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth import get_user_model
 
 # Posts model
 class Post(models.Model):
@@ -9,3 +10,12 @@ class Post(models.Model):
 
     def __str__(self):
         return self.title
+
+# User's Profile model
+class Profile(models.Model):
+    user = models.OneToOneField(get_user_model(), on_delete=models.CASCADE)
+    friends = models.ManyToManyField('self', blank=True)
+    birthday = models.DateField(null=False, blank=False)
+
+    def __str__(self):
+        return self.user.username

@@ -1,7 +1,7 @@
 import { Form, FormikProvider, useFormik } from "formik";
 import { useContext, useEffect, useState } from "react";
 import { Button, Table } from "reactstrap";
-import { InputText } from "~components/InputText";
+import { FormikInput } from "~components/FormikInput";
 import { SessionContext } from "~pages/_app";
 
 export default function Lobby() {
@@ -81,7 +81,7 @@ export default function Lobby() {
       <br />
       <FormikProvider value={formik}>
         <Form>
-          <InputText label="Message" name="message" type="text" />
+          <FormikInput label="Message" name="message" type="text" />
           <Button type="submit">Send</Button>
         </Form>
       </FormikProvider>

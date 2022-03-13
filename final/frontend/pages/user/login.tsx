@@ -2,7 +2,7 @@ import { Form, FormikErrors, FormikProvider, useFormik } from "formik";
 import { useRouter } from "next/dist/client/router";
 import { useContext, useState } from "react";
 import { Button, Spinner } from "reactstrap";
-import { InputText } from "~components/InputText";
+import { FormikInput } from "~components/FormikInput";
 import { SessionContext } from "~pages/_app";
 import { ACCESS_TOKEN } from "~utils/useSession";
 
@@ -89,8 +89,8 @@ export default function Login() {
       <p>Please enter your credentials to login.</p>
       <FormikProvider value={formik}>
         <Form>
-          <InputText name="username" label="Username" />
-          <InputText type="password" name="password" label="Password" />
+          <FormikInput name="username" label="Username" />
+          <FormikInput type="password" name="password" label="Password" />
           <Button type="submit" color="primary">
             Login {formik.isSubmitting && <Spinner size="sm" color="light" />}
           </Button>

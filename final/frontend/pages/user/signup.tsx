@@ -3,7 +3,7 @@ import { Form, FormikErrors, FormikProvider, useFormik } from 'formik';
 import { useRouter } from 'next/dist/client/router';
 import { useContext, useState } from 'react';
 import { Button, Spinner } from 'reactstrap';
-import { InputText } from '~components/InputText';
+import { FormikInput } from '~components/FormikInput';
 import { SessionContext } from '~pages/_app';
 
 const title = 'Sign up for a Circle account';
@@ -23,6 +23,7 @@ export default function Signup() {
     email?: string;
     password?: string;
     verifyPassword?: string;
+    "profile.birthday"?: string;
   }>({
     initialValues: {
       username: '',
@@ -31,6 +32,7 @@ export default function Signup() {
       email: '',
       password: '',
       verifyPassword: '',
+      "profile.birthday": '',
     },
     onSubmit: async values => {
       setFormFeedback(undefined);
@@ -83,6 +85,8 @@ export default function Signup() {
       }
       if (!values.email) {
         errors.email = 'Email is required';
+      } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(values.email)) {
+        errors.email = 'Invalid email address';
       }
       if (!values.password) {
         errors.password = 'Password is required';
@@ -95,6 +99,8 @@ export default function Signup() {
       return errors;
     },
   });
+
+  console.log(formik.values);
 
   if (user) {
     if (!formFeedback) {
@@ -112,22 +118,24 @@ export default function Signup() {
       <p>Please enter the following details to sign up for a Circle account.</p>
       <FormikProvider value={formik}>
         <Form>
-          <InputText type="text" name="username" label="Username" />
-          <InputText type="text" name="first_name" label="First name" />
-          <InputText type="text" name="last_name" label="Last Name" />
-          <InputText type="email" name="email" label="Email" />
-          <InputText
+          <FormikInput type="text" name="username" label="Username" />
+          <FormikInput type="text" name="first_name" label="First name" />
+          <FormikInput type="text" name="last_name" label="Last Name" />
+          <FormikInput type="email" name="email" label="Email" />
+          <FormikInput
             type="password"
             name="password"
             label="Password"
             minLength={8}
           />
-          <InputText
+          <FormikInput
             type="password"
             name="verifyPassword"
             label="Verify Password"
             minLength={8}
           />
+          {/* <FormikInput type='file' name='picture' label='Profile picture' /> */}
+          <FormikInput type="date" name="profile.birthday" label="Birthday" />
           <Button type="submit" color="primary">
             Signup {formik.isSubmitting && <Spinner size="sm" color="light" />}
           </Button>

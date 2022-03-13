@@ -3,7 +3,7 @@ import type { NextPage } from "next";
 import Error from "next/error";
 import { useContext, useState } from "react";
 import { Button } from "reactstrap";
-import { InputText } from "~components/InputText";
+import { FormikInput } from "~components/FormikInput";
 import { SessionContext } from "~pages/_app";
 
 const Home: NextPage = () => {
@@ -49,7 +49,7 @@ const Home: NextPage = () => {
     <>
       <FormikProvider value={formik_post}>
         <Form>
-          <InputText
+          <FormikInput
             name="body"
             label="Create a new post to share with friends."
           />
