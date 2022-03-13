@@ -9,7 +9,7 @@ import { SessionContext } from "~pages/_app";
 const Home: NextPage = () => {
   const { user } = useContext(SessionContext);
 
-  const [posts, setPosts] = useState<any>([]);
+  const [posts, setPosts] = useState<{[string: string]: any}[]>([]);
 
   const formik_post = useFormik({
     initialValues: {
