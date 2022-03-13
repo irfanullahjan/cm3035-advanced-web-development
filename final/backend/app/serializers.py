@@ -15,12 +15,24 @@ class ProfileSerializer(serializers.ModelSerializer):
         model = Profile
         fields = '__all__'
 
+class FriendRequestSerializer(serializers.ModelSerializer):
+
+    sender = serializers.PrimaryKeyRelatedField(
+        read_only=True, default=serializers.CurrentUserDefault())
+
+    class Meta:
+        model = FriendRequest
+        fields = '__all__'
 
 class UserSerializer(serializers.ModelSerializer):
 
     password = serializers.CharField(write_only=True)
 
     profile = ProfileSerializer()
+
+    friend_requests_received = FriendRequestSerializer(many=True)
+
+    friend_requests_sent = FriendRequestSerializer(many=True)
 
     def create(self, validated_data):
         profile_data = validated_data.pop('profile')

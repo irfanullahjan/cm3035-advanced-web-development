@@ -15,6 +15,7 @@ urlpatterns = [
     path('api/user/signup', api.CreateUserView.as_view(), name='user-signup'),
     path('api/user/login', api.AuthenticateUser.as_view(), name='user-login'),
     path('api/user/<int:id>/posts', api.UserPosts.as_view(), name='user-posts'),
+    path('api/user/friend', api.CreateFriendRequest.as_view(), name='friend-request'),
     path('api/users/<str:search_text>', api.FindUsersByUsername.as_view(), name='find-users-by-search-text'),
     path('api/post', api.CreatePost.as_view(), name='create-post'),
 ]

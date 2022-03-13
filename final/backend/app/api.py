@@ -3,7 +3,7 @@ from rest_framework import permissions
 from rest_framework import generics
 from django.contrib.auth import get_user_model, authenticate
 
-from .serializers import PostSerializer, UserSerializer
+from .serializers import *
 from .models import *
 
 
@@ -91,3 +91,14 @@ class CreatePost(generics.CreateAPIView):
     # add user_id to post
     def perform_create(self, serializer):
         serializer.save(user_id=self.request.user)
+
+class CreateFriendRequest(generics.CreateAPIView):
+    model = FriendRequest
+    permission_classes = [
+        # only authenticated users have user details
+        permissions.IsAuthenticated
+    ]
+    serializer_class = FriendRequestSerializer
+
+    def perform_create(self, serializer):
+        serializer.save(sender=self.request.user)
