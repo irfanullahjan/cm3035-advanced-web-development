@@ -42,7 +42,7 @@ export const NavbarTop = () => {
       <NavbarToggler onClick={toggle} />
       <Collapse isOpen={isOpen} navbar>
         <Nav className="mr-auto" navbar>
-          {user && (
+          {user ? (
             <>
               <NavItem>
                 <Link href="/lobby" passHref>
@@ -50,19 +50,18 @@ export const NavbarTop = () => {
                 </Link>
               </NavItem>
               <NavItem>
+                <Link href="/requests" passHref>
+                  <NavLink>Requests</NavLink>
+                </Link>
+              </NavItem>
+              <NavItem>
                 <Link href="/friends" passHref>
                   <NavLink>Friends</NavLink>
                 </Link>
               </NavItem>
-            </>
-          )}
-        </Nav>
-        <Nav className="mr-0" navbar>
-          {user ? (
-            <>
               <NavItem>
-                <Link href={`/user/profile/${user.id}`} passHref>
-                  <NavLink>My Profile</NavLink>
+                <Link href={`/profile/${user.id}`} passHref>
+                  <NavLink>Profile</NavLink>
                 </Link>
               </NavItem>
               <NavItem>
@@ -76,12 +75,12 @@ export const NavbarTop = () => {
           ) : (
             <>
               <NavItem>
-                <Link href="/user/signup" passHref>
+                <Link href="/signup" passHref>
                   <NavLink>Signup</NavLink>
                 </Link>
               </NavItem>
               <NavItem>
-                <Link href="/user/login" passHref>
+                <Link href="/login" passHref>
                   <NavLink>Login</NavLink>
                 </Link>
               </NavItem>

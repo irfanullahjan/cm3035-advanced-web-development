@@ -60,7 +60,7 @@ export default function Signup() {
             accent: "success",
             message: "Signup successful. Redirecting you to login page.",
           });
-          setTimeout(() => router.push("/user/login"), 1000);
+          setTimeout(() => router.push("/login"), 1000);
         } else if (res.status === 400) {
           setFormFeedback({
             accent: "danger",

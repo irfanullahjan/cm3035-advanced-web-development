@@ -91,6 +91,12 @@ This will install the Node.js packages needed to run the frontend application. N
 npm run dev
 ```
 
+## Models and data structure
+
+## REST API and other endpoints
+
+
+
 ## Tests
 
 I opted to perform integration testing rather than 

@@ -15,6 +15,8 @@ export default function Profile() {
 
   const [userDetail, setUserDetail] = useState<any>(null);
 
+  const [userPosts, setUserPosts] = useState<{}[]>([]);
+
   useEffect(() => {
     if (id && user) {
       fetch(`/api/user/${id}`, {
@@ -29,6 +31,21 @@ export default function Profile() {
         });
     }
   }, [id, user, user?.token]);
+
+  useEffect(() => {
+    if (user && id) {
+      fetch(`/api/user/${id}/posts`, {
+        headers: {
+          Authorization: `Bearer ${user.token}`,
+          ContentType: "application/json",
+        },
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          setUserPosts(data);
+        });
+    }
+  }, [userDetail, user, id]);
 
   if (!user)
     return (
@@ -67,9 +84,19 @@ export default function Profile() {
           </tbody>
         </Table>
       )}
-      {userDetail?.id === user.id && (
+      {userPosts?.length > 0 && (
         <>
-          <h2>My Posts</h2>
+          {userDetail?.id === user.id ? <h2>My Posts</h2> : <h2>User Posts</h2>}
+          <Table>
+            <tbody>
+              {userPosts.map((post) => (
+                <tr key={post.id}>
+                  <td>{post.created_at}</td>
+                  <td>{post.body}</td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
         </>
       )}
     </>

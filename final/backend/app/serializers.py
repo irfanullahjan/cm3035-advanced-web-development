@@ -1,8 +1,7 @@
 from rest_framework import serializers
-from django.contrib.auth import get_user_model  # If used custom user model
+from django.contrib.auth.models import User
+from django.contrib.auth.hashers import make_password
 from .models import *
-
-UserModel = get_user_model()
 
 class ProfileSerializer(serializers.ModelSerializer):
 
@@ -30,27 +29,30 @@ class UserSerializer(serializers.ModelSerializer):
 
     profile = ProfileSerializer()
 
-    friend_requests_received = FriendRequestSerializer(many=True)
+    friend_requests_received = FriendRequestSerializer(many=True, read_only=True)
 
-    friend_requests_sent = FriendRequestSerializer(many=True)
+    friend_requests_sent = FriendRequestSerializer(many=True, read_only=True)
+
+    def validate_password(self, value):
+        return make_password(value)
 
     def create(self, validated_data):
         profile_data = validated_data.pop('profile')
-        user = UserModel.objects.create(**validated_data)
+        user = User.objects.create(**validated_data)
         Profile.objects.create(user=user, **profile_data)
         return user
 
     class Meta:
-        model = UserModel
+        model = User
         fields = '__all__'
 
 
 class PostSerializer(serializers.ModelSerializer):
 
-    user_id = serializers.PrimaryKeyRelatedField(
+    user = serializers.PrimaryKeyRelatedField(
         read_only=True, default=serializers.CurrentUserDefault())
 
-    username = serializers.CharField(source='user_id.username', read_only=True)
+    username = serializers.CharField(source='user.username', read_only=True)
 
     class Meta:
         model = Post

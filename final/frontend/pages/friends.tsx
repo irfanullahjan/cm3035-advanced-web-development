@@ -7,6 +7,8 @@ import { genderCodeGroup } from "~constants/codeGroups";
 import { SessionContext } from "~pages/_app";
 import { getAgeInYears } from "~utils/getAgeInYears";
 
+const title = "Find friends";
+
 export default function Friends() {
   const { user } = useContext(SessionContext);
   const [friends, setFriends] = useState<any[]>([]);
@@ -42,7 +44,7 @@ export default function Friends() {
 
   useEffect(() => {
     if (user) {
-      fetch(`/api/friends/${user.id}`, {
+      fetch(`/api/user/${user.id}/friends`, {
         headers: {
           Authorization: `Bearer ${user.token}`,
           ContentType: "application/json",
@@ -65,7 +67,7 @@ export default function Friends() {
   }
 
   const sendFriendRequest = async (friendId: number) => {
-    await fetch(`/api/user/friend`, {
+    await fetch(`/api/request`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${user.token}`,
@@ -155,3 +157,5 @@ export default function Friends() {
     </>
   );
 }
+
+Friends.title = title;
