@@ -25,7 +25,9 @@ class ChatConsumer(WebsocketConsumer):
     def receive(self, text_data):
         text_data_json = json.loads(text_data)
         message = text_data_json['message']
-        username = text_data_json['username']
+
+        # get user from request scope
+        user = self.scope['user']
 
         # Send message to room group
         async_to_sync(self.channel_layer.group_send)(
@@ -33,7 +35,7 @@ class ChatConsumer(WebsocketConsumer):
             {
                 'type': 'chat_message',
                 'message': message,
-                'username': username,
+                'username': user.username,
                 'timestamp': datetime.now().strftime('%H:%M hrs')
             }
         )

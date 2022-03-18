@@ -1,4 +1,5 @@
 import { Form, FormikProvider, useFormik } from "formik";
+import Error from "next/error";
 import { useContext, useEffect, useState } from "react";
 import { Button, Table } from "reactstrap";
 import { FormikInput } from "~components/FormikInput";
@@ -45,13 +46,20 @@ export default function Lobby() {
         socket.send(
           JSON.stringify({
             message: values.message,
-            username: user.username,
           })
         );
         formik.resetForm();
       }
     },
   });
+
+  if (!user)
+    return (
+      <Error
+        statusCode={401}
+        title="Sorry! You need to be logged in to access this page."
+      />
+    );
 
   return (
     <div>

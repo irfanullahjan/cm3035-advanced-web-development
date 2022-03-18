@@ -26,6 +26,13 @@ export default function Login() {
       password: "",
     },
     onSubmit: async (values) => {
+      await fetch("/api/user/login", {
+        body: JSON.stringify(values),
+        headers: {
+          "Content-Type": "application/json",
+        },
+        method: "POST",
+      });
       setFormFeedback(undefined);
       try {
         const res = await fetch("/api/user/token", {

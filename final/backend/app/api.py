@@ -2,7 +2,7 @@ from django.http import JsonResponse
 from rest_framework import permissions
 from rest_framework import generics
 from django.contrib.auth.models import User
-from django.contrib.auth import get_user_model, authenticate
+from django.contrib.auth import get_user_model, authenticate, login
 
 from .serializers import *
 from .models import *
@@ -18,8 +18,6 @@ class CreateUserView(generics.CreateAPIView):
     fields = '__all__'
 
 # authenticate a user
-
-
 class AuthenticateUser(generics.CreateAPIView):
     permission_classes = [
         permissions.AllowAny
@@ -34,8 +32,8 @@ class AuthenticateUser(generics.CreateAPIView):
         user = authenticate(username=username, password=password)
         if not user:
             return JsonResponse({'error': 'Invalid Credentials'}, status=404)
+        login(request, user)
         return JsonResponse({'success': 'Successfully authenticated'})
-
 
 class CurrentUserView(generics.RetrieveAPIView):
 
@@ -56,10 +54,17 @@ class UserById(generics.RetrieveAPIView):
         # only authenticated users have user details
         permissions.IsAuthenticated
     ]
-    serializer_class = UserSerializer
 
     def get_object(self):
         return get_user_model().objects.get(id=self.kwargs['id'])
+
+    def get_serializer_class(self):
+        if self.request.user.id == self.kwargs['id']:
+            # if the user is requesting their own profile, return the full serializer
+            return UserSerializer
+        
+        # otherwise, return a restricted serializer
+        return UserSerializerRestricted
 
 
 class FindUsersByUsername(generics.ListAPIView):
