@@ -1,29 +1,35 @@
 from django.http import JsonResponse
 from rest_framework import permissions
 from rest_framework import generics
+from rest_framework.views import APIView
 from django.contrib.auth.models import User
-from django.contrib.auth import get_user_model, authenticate, login
+from django.contrib.auth import authenticate, login, logout
 
 from .serializers import *
 from .models import *
 
 
-class CreateUserView(generics.CreateAPIView):
-
+class CreateRetrieveUser(generics.CreateAPIView):
     model = User
     permission_classes = [
-        permissions.AllowAny  # Or anon users can't register
+        permissions.AllowAny 
     ]
     serializer_class = UserSerializer
     fields = '__all__'
 
-# authenticate a user
-class AuthenticateUser(generics.CreateAPIView):
-    permission_classes = [
-        permissions.AllowAny
-    ]
-    serializer_class = UserSerializer
+    # get current user
+    def get(self, request):
+        if not request.user.is_authenticated:
+            return JsonResponse({'error': 'User is not authenticated'}, status=401)
+        user = request.user
+        serializer = UserSerializer(user)
+        return JsonResponse(serializer.data)
 
+    def get_permissions(self):
+        return super().get_permissions()
+
+# authenticate a user
+class UserLogin(APIView):
     def post(self, request):
         username = request.data.get("username")
         password = request.data.get("password")
@@ -34,6 +40,11 @@ class AuthenticateUser(generics.CreateAPIView):
             return JsonResponse({'error': 'Invalid Credentials'}, status=404)
         login(request, user)
         return JsonResponse({'success': 'Successfully authenticated'})
+
+class UserLogout(APIView):
+    def get(self, request):
+        logout(request)
+        return JsonResponse({'success': 'Successfully logged out'})
 
 class CurrentUserView(generics.RetrieveAPIView):
 
@@ -56,7 +67,7 @@ class UserById(generics.RetrieveAPIView):
     ]
 
     def get_object(self):
-        return get_user_model().objects.get(id=self.kwargs['id'])
+        return User.objects.get(id=self.kwargs['id'])
 
     def get_serializer_class(self):
         if self.request.user.id == self.kwargs['id']:
@@ -68,7 +79,7 @@ class UserById(generics.RetrieveAPIView):
 
 
 class FindUsersByUsername(generics.ListAPIView):
-    model = get_user_model()
+    model = User
     permission_classes = [
         # only authenticated users have user details
         permissions.IsAuthenticated
@@ -78,7 +89,7 @@ class FindUsersByUsername(generics.ListAPIView):
     def get_queryset(self):
         search_text = self.kwargs['search_text']
         print('search_text', search_text)
-        return get_user_model().objects.filter(username__icontains=search_text)
+        return User.objects.filter(username__icontains=search_text)
 
 
 class UserPosts(generics.ListAPIView):

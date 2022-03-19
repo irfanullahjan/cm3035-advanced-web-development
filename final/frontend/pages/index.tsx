@@ -5,6 +5,8 @@ import { useContext, useState } from "react";
 import { Button } from "reactstrap";
 import { FormikInput } from "~components/FormikInput";
 import { SessionContext } from "~pages/_app";
+import { fetcher } from "~utils/fetcher";
+import { getCookie } from "~utils/getCookie";
 
 const Home: NextPage = () => {
   const { user } = useContext(SessionContext);
@@ -24,12 +26,8 @@ const Home: NextPage = () => {
     },
     onSubmit: (values) => {
       formik_post.resetForm();
-      fetch("/api/post", {
+      fetcher("/api/post", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${user.token}`,
-        },
         body: JSON.stringify(values),
       })
         .then((res) => res.json())

@@ -8,10 +8,10 @@ import { Spinner } from "reactstrap";
 export const SessionContext = createContext<any>(null);
 
 function MyApp({ Component, pageProps }: AppProps) {
-  const [user, userLoading, updateSession] = useSession();
+  const [user, userLoading, updateSession, logout] = useSession();
   if (userLoading) return <Spinner />;
   return (
-    <SessionContext.Provider value={{ user, updateSession }}>
+    <SessionContext.Provider value={{ user, updateSession, logout }}>
       <Layout>
         <Component {...pageProps} />
       </Layout>

@@ -30,7 +30,7 @@ export function Layout(props: Props) {
       <div style={{ flex: '1 0 auto' }}>
         <Container>
           <Row>
-            <Col>{children}</Col>
+            <Col className='py-4'>{children}</Col>
           </Row>
         </Container>
       </div>

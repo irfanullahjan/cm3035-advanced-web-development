@@ -4,7 +4,7 @@ import { useContext, useState } from "react";
 import { Button, Spinner } from "reactstrap";
 import { FormikInput } from "~components/FormikInput";
 import { SessionContext } from "~pages/_app";
-import { ACCESS_TOKEN } from "~utils/useSession";
+import { fetcher } from "~utils/fetcher";
 
 const title = "Login to Circle";
 
@@ -26,30 +26,19 @@ export default function Login() {
       password: "",
     },
     onSubmit: async (values) => {
-      await fetch("/api/user/login", {
-        body: JSON.stringify(values),
-        headers: {
-          "Content-Type": "application/json",
-        },
-        method: "POST",
-      });
       setFormFeedback(undefined);
       try {
-        const res = await fetch("/api/user/token", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+        const res = await fetcher("/api/user/login", {
           body: JSON.stringify(values),
+          method: "POST",
         });
-        const authJson = await res.json();
-        if (authJson.access && authJson.refresh) {
-          localStorage.setItem(ACCESS_TOKEN, authJson.access);
+        const resJson = await res.json();
+        if (res.status === 200) {
           setFormFeedback({
             accent: "success",
             message: "Login successful. Redirecting you to home page.",
           });
-        } else if (res.status === 401) {
+        } else if (resJson.error) {
           setFormFeedback({
             accent: "danger",
             message:
@@ -98,7 +87,7 @@ export default function Login() {
         <Form>
           <FormikInput name="username" label="Username" />
           <FormikInput type="password" name="password" label="Password" />
-          <Button type="submit" color="primary">
+          <Button type="submit" color="primary" disabled={!formik.isValid || formik.isSubmitting}>
             Login {formik.isSubmitting && <Spinner size="sm" color="light" />}
           </Button>
           {formFeedback && (

@@ -48,7 +48,7 @@ export default function Signup() {
           ...values,
         };
         delete formData.verifyPassword;
-        const res = await fetch("/api/user/signup", {
+        const res = await fetch("/api/user", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

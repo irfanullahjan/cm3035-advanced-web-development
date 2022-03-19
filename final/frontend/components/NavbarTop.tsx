@@ -11,12 +11,11 @@ import {
 } from "reactstrap";
 import { SessionContext } from "~pages/_app";
 import { useRouter } from "next/dist/client/router";
-import { ACCESS_TOKEN } from "~utils/useSession";
 
 export const NavbarTop = () => {
   const [isOpen, setIsOpen] = useState(false);
 
-  const { user, updateSession } = useContext(SessionContext);
+  const { user, updateSession, logout } = useContext(SessionContext);
 
   const toggle = () => setIsOpen(!isOpen);
 
@@ -25,8 +24,7 @@ export const NavbarTop = () => {
   const handleLogout = (event: any) => {
     if (confirm("Are you sure you want to logout?")) {
       event.preventDefault();
-      localStorage.removeItem(ACCESS_TOKEN);
-      updateSession();
+      logout();
       router.push("/");
     }
   };
