@@ -3,6 +3,19 @@ from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
 from .models import *
 
+class UserSerializerRestricted(serializers.ModelSerializer):
+    
+        class Meta:
+            model = User
+            fields = ('id', 'username', 'first_name', 'last_name', 'email')
+
+class FriendsProfileSerializer(serializers.ModelSerializer):
+    user = UserSerializerRestricted(read_only=True)
+
+    class Meta:
+        model = Profile
+        fields = '__all__'
+
 class ProfileSerializer(serializers.ModelSerializer):
 
     birthday = serializers.DateField(format="%Y-%m-%d")
@@ -10,9 +23,12 @@ class ProfileSerializer(serializers.ModelSerializer):
     # setting to read only to pass validation coz user will be poppulated once created
     user = serializers.PrimaryKeyRelatedField(read_only=True)
 
+    friends = FriendsProfileSerializer(many=True, read_only=True)
+
     class Meta:
         model = Profile
         fields = '__all__'
+        depth = 1
 
 class FriendRequestSerializer(serializers.ModelSerializer):
 
@@ -23,15 +39,29 @@ class FriendRequestSerializer(serializers.ModelSerializer):
         model = FriendRequest
         fields = '__all__'
 
+class FriendRequestSentSerializer(serializers.ModelSerializer):
+        receiver = UserSerializerRestricted()
+    
+        class Meta:
+            model = FriendRequest
+            fields = '__all__'
+
+class FriendRequestReceivedSerializer(serializers.ModelSerializer):
+        sender = UserSerializerRestricted()
+    
+        class Meta:
+            model = FriendRequest
+            fields = '__all__'
+
 class UserSerializer(serializers.ModelSerializer):
 
     password = serializers.CharField(write_only=True)
 
     profile = ProfileSerializer()
 
-    friend_requests_received = FriendRequestSerializer(many=True, read_only=True)
+    friend_requests_received = FriendRequestReceivedSerializer(many=True, read_only=True)
 
-    friend_requests_sent = FriendRequestSerializer(many=True, read_only=True)
+    friend_requests_sent = FriendRequestSentSerializer(many=True, read_only=True)
 
     def validate_password(self, value):
         return make_password(value)
@@ -45,12 +75,6 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = '__all__'
-
-class UserSerializerRestricted(serializers.ModelSerializer):
-    
-        class Meta:
-            model = User
-            fields = ('id', 'username', 'first_name', 'last_name', 'email')
 
 
 class PostSerializer(serializers.ModelSerializer):

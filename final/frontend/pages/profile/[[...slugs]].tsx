@@ -13,7 +13,7 @@ export default function Profile() {
 
   const router = useRouter();
 
-  // slugs is an array of strings from url of the form: /profile/:slug1/:slug2/...
+  // https://nextjs.org/docs/routing/dynamic-routes#catch-all-routes
   const { slugs } = router.query;
 
   // if no slugs, then user is viewing their own profile

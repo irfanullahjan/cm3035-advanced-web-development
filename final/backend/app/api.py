@@ -9,26 +9,13 @@ from .serializers import *
 from .models import *
 
 
-class CreateRetrieveUser(generics.CreateAPIView):
+class CreateUser(generics.CreateAPIView):
     model = User
     permission_classes = [
         permissions.AllowAny
     ]
     serializer_class = UserSerializer
     fields = '__all__'
-
-    # get current user
-    def get(self, request):
-        if not request.user.is_authenticated:
-            return JsonResponse({'error': 'User is not authenticated'}, status=401)
-        user = request.user
-        serializer = UserSerializer(user)
-        return JsonResponse(serializer.data)
-
-    def get_permissions(self):
-        return super().get_permissions()
-
-# authenticate a user
 
 
 class UserLogin(APIView):
@@ -50,7 +37,7 @@ class UserLogout(APIView):
         return JsonResponse({'success': 'Successfully logged out'})
 
 
-class CurrentUserView(generics.RetrieveAPIView):
+class CurrentUser(generics.RetrieveAPIView):
 
     model = User
     permission_classes = [
@@ -93,7 +80,9 @@ class FindUsersByUsername(generics.ListAPIView):
     def get_queryset(self):
         search_text = self.kwargs['search_text']
         print('search_text', search_text)
-        return User.objects.filter(username__icontains=search_text)
+
+        # return all users whose username contains the search text excluding the current user and superusers
+        return User.objects.filter(username__icontains=search_text).exclude(id=self.request.user.id).exclude(is_superuser=True)
 
 
 class UserPosts(generics.ListAPIView):
@@ -117,6 +106,20 @@ class UserPosts(generics.ListAPIView):
 
         # else return nothing
         self.permission_denied(self.request)
+
+# friends by user id
+
+
+class UserFriends(generics.ListAPIView):
+    model = User
+    permission_classes = [
+        # only authenticated users can see user posts
+        permissions.IsAuthenticated
+    ]
+    serializer_class = UserSerializerRestricted
+
+    def get_queryset(self):
+        return self.request.user.profile.friends.all()
 
 
 class CreateAndListPosts(generics.CreateAPIView, generics.ListAPIView):
@@ -148,3 +151,30 @@ class CreateFriendRequest(generics.CreateAPIView):
 
     def perform_create(self, serializer):
         serializer.save(sender=self.request.user)
+
+# accept friend request
+
+
+class AcceptFriendRequest(generics.DestroyAPIView):
+    model = FriendRequest
+    permission_classes = [
+        # only authenticated users can accept friend requests
+        permissions.IsAuthenticated
+    ]
+    serializer_class = FriendRequestSerializer
+    lookup_field = 'id'
+
+    def perform_destroy(self, instance):
+        # add the sender to the receiver's friends
+        self.request.user.profile.friends.add(instance.sender.profile)
+
+        # add the receiver to the sender's friends
+        instance.sender.profile.friends.add(self.request.user.profile)
+
+        # delete the friend request
+        instance.delete()
+
+        return JsonResponse({'success': 'Friend request accepted'})
+
+    def get_queryset(self):
+        return FriendRequest.objects.filter(receiver=self.request.user)

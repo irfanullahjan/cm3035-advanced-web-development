@@ -2,9 +2,20 @@ import Error from "next/error";
 import { useContext } from "react";
 import { Button, Table } from "reactstrap";
 import { SessionContext } from "~pages/_app";
+import { fetcher } from "~utils/fetcher";
 
 export default function Requests() {
-  const { user } = useContext(SessionContext);
+  const { user, updateSession } = useContext(SessionContext);
+
+  const acceptRequest = (id: string) => {
+    fetcher(`/api/request/${id}/accept`, {
+      method: "DELETE",
+    }).then((res) => {
+      if (res.status === 200) {
+        updateSession();
+      }
+    });
+  };
 
   if (!user) {
     return (
@@ -26,17 +37,17 @@ export default function Requests() {
           <thead>
             <tr>
               <th>Username</th>
-              <th>Age</th>
+              <th>Email</th>
               <th />
             </tr>
           </thead>
           <tbody>
-            {received.map((request) => (
-              <tr key={request.username}>
-                <td>{request.username}</td>
-                <td>{request.first_name}</td>
+            {received.map(({ id, sender }) => (
+              <tr key={sender.username}>
+                <td>{sender.username}</td>
+                <td>{sender.email}</td>
                 <td>
-                  <Button>Accept</Button>
+                  <Button onClick={() => acceptRequest(id)}>Accept</Button>
                 </td>
               </tr>
             ))}
@@ -51,15 +62,15 @@ export default function Requests() {
           <thead>
             <tr>
               <th>Username</th>
-              <th>Age</th>
+              <th>Email</th>
               <th />
             </tr>
           </thead>
           <tbody>
-            {sent.map((request) => (
-              <tr key={request.username}>
-                <td>{request.username}</td>
-                <td>{request.first_name}</td>
+            {sent.map(({ receiver }) => (
+              <tr key={receiver.id}>
+                <td>{receiver.username}</td>
+                <td>{receiver.email}</td>
                 <td>
                   <Button>Revoke</Button>
                 </td>

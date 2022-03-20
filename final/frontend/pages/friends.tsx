@@ -1,17 +1,18 @@
 import { Form, FormikErrors, FormikProvider, useFormik } from "formik";
 import Error from "next/error";
+import Link from "next/link";
 import { useContext, useEffect, useState } from "react";
 import { Button, Table } from "reactstrap";
 import { FormikInput } from "~components/FormikInput";
 import { genderCodeGroup } from "~constants/codeGroups";
 import { SessionContext } from "~pages/_app";
-import { getAgeInYears } from "~utils/formatters";
+import { fetcher } from "~utils/fetcher";
+import { formatDayMonth, getAgeInYears } from "~utils/formatters";
 
 const title = "Find friends";
 
 export default function Friends() {
   const { user } = useContext(SessionContext);
-  const [friends, setFriends] = useState<any[]>([]);
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [showMore, setShowMore] = useState(false);
 
@@ -42,21 +43,6 @@ export default function Friends() {
     },
   });
 
-  useEffect(() => {
-    if (user) {
-      fetch(`/api/user/${user.id}/friends`, {
-        headers: {
-          Authorization: `Bearer ${user.token}`,
-          ContentType: "application/json",
-        },
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          setFriends(data);
-        });
-    }
-  }, [user, user?.id, user?.token]);
-
   if (!user) {
     return (
       <Error
@@ -67,17 +53,15 @@ export default function Friends() {
   }
 
   const sendFriendRequest = async (friendId: number) => {
-    await fetch(`/api/request`, {
+    await fetcher(`/api/request`, {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${user.token}`,
-        "Content-Type": "application/json",
-      },
       body: JSON.stringify({
         receiver: friendId,
-      })
-    })
-  }
+      }),
+    });
+  };
+
+  const friends = user.profile.friends;
 
   return (
     <>
@@ -118,42 +102,56 @@ export default function Friends() {
                       }
                     </td>
                     <td>
-                      <Button onClick={() => sendFriendRequest(result.id)}>Send Friend Request</Button>
+                      {!user.friend_requests_sent?.find(
+                        (request) => request.receiver === result.id
+                      ) && (
+                        <Button onClick={() => sendFriendRequest(result.id)}>
+                          Send Friend Request
+                        </Button>
+                      )}
                     </td>
                   </tr>
                 ))}
             </tbody>
           </Table>
-          <Button
-            size="sm"
-            onClick={(e) => {
-              setShowMore(!showMore);
-              e.preventDefault();
-            }}
-          >{`Show ${showMore ? "less" : "more"}`}</Button>
+          {searchResults.length > 5 && (
+            <Button
+              size="sm"
+              onClick={(e) => {
+                setShowMore(!showMore);
+                e.preventDefault();
+              }}
+            >{`Show ${showMore ? "less" : "more"}`}</Button>
+          )}
         </>
       )}
       <br />
       <br />
-      <h1>Friends</h1>
-      <Table>
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Age</th>
-            <th>Email</th>
-          </tr>
-        </thead>
-        <tbody>
-          {friends.map((friend) => (
-            <tr key={friend.id}>
-              <td>{`${friend.first_name} ${friend.last_name}`}</td>
-              <td>{getAgeInYears(friend.birthday)}</td>
-              <td>{friend.email}</td>
-            </tr>
-          ))}
-        </tbody>
-      </Table>
+      {friends.length > 0 && (
+        <>
+          <h1>Friends</h1>
+          <Table>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Birthday</th>
+                <th>Email</th>
+                <th />
+              </tr>
+            </thead>
+            <tbody>
+              {friends.map((friend) => (
+                <tr key={friend.id}>
+                  <td>{`${friend.user.first_name} ${friend.user.last_name}`}</td>
+                  <td>{formatDayMonth(friend.birthday)}</td>
+                  <td>{friend.user.email}</td>
+                  <td><Link href={`/profile/${friend.user.id}`}>View Profile</Link></td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+        </>
+      )}
     </>
   );
 }

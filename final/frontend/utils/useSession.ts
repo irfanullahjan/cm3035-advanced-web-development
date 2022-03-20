@@ -7,7 +7,7 @@ export function useSession() {
   const loadSession = async () => {
     const jwt = true;
     if (jwt) {
-      const res = await fetch('/api/user');
+      const res = await fetch('/api/user/current');
       if (res.status === 200) {
         const userJson = await res.json();
         if (userJson.id) {
