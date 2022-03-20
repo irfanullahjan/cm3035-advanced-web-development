@@ -8,25 +8,34 @@ import {
   Navbar,
   NavbarBrand,
   NavbarToggler,
+  Modal,
+  ModalBody,
+  ModalFooter,
+  Button,
+  ModalHeader,
 } from "reactstrap";
 import { SessionContext } from "~pages/_app";
 import { useRouter } from "next/dist/client/router";
 
 export const NavbarTop = () => {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   const { user, updateSession, logout } = useContext(SessionContext);
 
-  const toggle = () => setIsOpen(!isOpen);
+  const toggle = () => setIsMenuOpen(!isMenuOpen);
 
   const router = useRouter();
 
-  const handleLogout = (event: any) => {
-    if (confirm("Are you sure you want to logout?")) {
-      event.preventDefault();
-      logout();
-      router.push("/");
-    }
+  const handleClickLogout = (event: React.SyntheticEvent<HTMLElement>) => {
+    event.preventDefault();
+    setShowLogoutModal(true);
+  };
+
+  const handleLogout = () => {
+    setShowLogoutModal(false);
+    logout();
+    router.push("/");
   };
 
   return (
@@ -38,7 +47,7 @@ export const NavbarTop = () => {
         〇 Circle
       </NavbarBrand>
       <NavbarToggler onClick={toggle} />
-      <Collapse isOpen={isOpen} navbar>
+      <Collapse isOpen={isMenuOpen} navbar>
         <Nav className="mr-auto" navbar>
           {user ? (
             <>
@@ -63,11 +72,19 @@ export const NavbarTop = () => {
                 </Link>
               </NavItem>
               <NavItem>
-                <Link href="/" passHref>
-                  <NavLink onClick={handleLogout} style={{ cursor: "pointer" }}>
-                    Logout
-                  </NavLink>
-                </Link>
+                <NavLink href="/" onClick={handleClickLogout}>
+                  Logout
+                </NavLink>
+                <Modal isOpen={showLogoutModal}>
+                  <ModalHeader>Logout</ModalHeader>
+                  <ModalBody>
+                    <p>Are you sure you want to logout?</p>
+                  </ModalBody>
+                  <ModalFooter>
+                    <Button onClick={handleLogout} color="danger">Yes, Logout</Button>
+                    <Button onClick={() => setShowLogoutModal(false)}>Cancel</Button>
+                  </ModalFooter>
+                </Modal>
               </NavItem>
             </>
           ) : (
