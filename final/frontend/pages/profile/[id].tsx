@@ -3,7 +3,7 @@ import { useContext, useEffect, useState } from "react";
 import { SessionContext } from "~pages/_app";
 import Error from "next/error";
 import { Table } from "reactstrap";
-import { getAgeInYears, getBirthday, getGenderName } from "~utils/formatters";
+import { formatDayMonth, getAgeInYears, getBirthday, getGenderName } from "~utils/formatters";
 import { Post } from "~components/Post";
 
 const title = "User Profile";
@@ -81,7 +81,7 @@ export default function Profile() {
                 </tr>
                 <tr>
                   <td>Birthday</td>
-                  <td>{getBirthday(userDetail.profile.birthday)}</td>
+                  <td>{formatDayMonth(userDetail.profile.birthday)}</td>
                 </tr>
               </>
             )}

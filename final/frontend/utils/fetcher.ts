@@ -1,23 +1,25 @@
-import { CSRF_COOKIE_NAME } from "~constants/general";
+import { CSRF_COOKIE_NAME, CSRF_HEADER_NAME } from "~constants/general";
 import { getCookie } from "./getCookie";
 
-export const fetcher = async (...args: Parameters<typeof fetch>) => {
-
+/**
+ * A wrapper around the fetch function that adds content type and csrf token headers if not present.
+ * @param input The url to fetch from.
+ * @param init The init object to pass to the fetch function.
+ * @returns A promise that resolves to the response.
+ */
+export const fetcher = async (input: RequestInfo, init?: RequestInit) => {
   // get headers from args
-  let headers = args[1]?.headers ?? new Headers();
+  const headers = init?.headers ? new Headers(init.headers) : new Headers();
 
-  // add csrf token to headers
-  headers = new Headers({
-    ...headers,
-    'Content-Type': 'application/json',
-    'X-CSRFToken': getCookie(CSRF_COOKIE_NAME)
-  });
+  // if content type is not set, set it to application/json
+  if (!headers.has("Content-Type")) {
+    headers.set("Content-Type", "application/json");
+  }
 
-  // add headers to args
-  args[1] = {
-    ...args[1],
-    headers
-  };
+  // if csrf token is not set, add it to headers
+  if (!headers.has(CSRF_HEADER_NAME)) {
+    headers.set(CSRF_HEADER_NAME, getCookie(CSRF_COOKIE_NAME));
+  }
 
-  return fetch(...args);
+  return fetch(input, { ...init, headers });
 };
