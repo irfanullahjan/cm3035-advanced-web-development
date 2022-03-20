@@ -5,7 +5,7 @@ import { Button, Table } from "reactstrap";
 import { FormikInput } from "~components/FormikInput";
 import { genderCodeGroup } from "~constants/codeGroups";
 import { SessionContext } from "~pages/_app";
-import { getAgeInYears } from "~utils/getAgeInYears";
+import { getAgeInYears } from "~utils/formatters";
 
 const title = "Find friends";
 
@@ -27,7 +27,7 @@ export default function Friends() {
       return errors;
     },
     onSubmit: (values) => {
-      fetch(`/api/users/${values.searchText}`, {
+      fetch(`/api/user/${values.searchText}`, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${user.token}`,

@@ -12,7 +12,7 @@ from .models import *
 class CreateRetrieveUser(generics.CreateAPIView):
     model = User
     permission_classes = [
-        permissions.AllowAny 
+        permissions.AllowAny
     ]
     serializer_class = UserSerializer
     fields = '__all__'
@@ -29,6 +29,8 @@ class CreateRetrieveUser(generics.CreateAPIView):
         return super().get_permissions()
 
 # authenticate a user
+
+
 class UserLogin(APIView):
     def post(self, request):
         username = request.data.get("username")
@@ -41,10 +43,12 @@ class UserLogin(APIView):
         login(request, user)
         return JsonResponse({'success': 'Successfully authenticated'})
 
+
 class UserLogout(APIView):
     def get(self, request):
         logout(request)
         return JsonResponse({'success': 'Successfully logged out'})
+
 
 class CurrentUserView(generics.RetrieveAPIView):
 
@@ -73,7 +77,7 @@ class UserById(generics.RetrieveAPIView):
         if self.request.user.id == self.kwargs['id']:
             # if the user is requesting their own profile, return the full serializer
             return UserSerializer
-        
+
         # otherwise, return a restricted serializer
         return UserSerializerRestricted
 
@@ -95,7 +99,7 @@ class FindUsersByUsername(generics.ListAPIView):
 class UserPosts(generics.ListAPIView):
     model = Post
     permission_classes = [
-        # only authenticated users have user details
+        # only authenticated users can see user posts
         permissions.IsAuthenticated
     ]
     serializer_class = PostSerializer
@@ -106,31 +110,38 @@ class UserPosts(generics.ListAPIView):
         # if the current user is the owner
         if self.request.user.id == self.kwargs['id']:
             return userposts
-        
+
         # if users profile is friends with owners profile
         if self.request.user.profile.friends.filter(id=self.kwargs['id']).exists():
             return userposts
-        
+
         # else return nothing
         self.permission_denied(self.request)
 
-class CreatePost(generics.CreateAPIView):
+
+class CreateAndListPosts(generics.CreateAPIView, generics.ListAPIView):
     model = Post
     permission_classes = [
-        # only authenticated users have user details
+        # only authenticated users can create and view posts
         permissions.IsAuthenticated
     ]
     serializer_class = PostSerializer
 
-    # add user_id to post
+    # add user from request context to post
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
+    def get_queryset(self):
+        users_posts_query = Post.objects.filter(user=self.request.user)
+        friends_posts_query = Post.objects.filter(
+            user__profile__friends=self.request.user.profile)
+        return (users_posts_query | friends_posts_query).order_by('-created_at')
 
 
 class CreateFriendRequest(generics.CreateAPIView):
     model = FriendRequest
     permission_classes = [
-        # only authenticated users have user details
+        # only authenticated users can send friend requests
         permissions.IsAuthenticated
     ]
     serializer_class = FriendRequestSerializer

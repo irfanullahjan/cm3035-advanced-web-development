@@ -35,7 +35,7 @@ export const NavbarTop = () => {
         onClick={() => router.push("/")}
         style={{ cursor: "pointer" }}
       >
-        Circle
+        〇 Circle
       </NavbarBrand>
       <NavbarToggler onClick={toggle} />
       <Collapse isOpen={isOpen} navbar>

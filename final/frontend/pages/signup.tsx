@@ -5,7 +5,7 @@ import { Button, Col, Container, FormGroup, Row, Spinner } from "reactstrap";
 import { FormikInput } from "~components/FormikInput";
 import { genderCodeGroup } from "~constants/codeGroups";
 import { SessionContext } from "~pages/_app";
-import { getAgeInYears } from "~utils/getAgeInYears";
+import { getAgeInYears } from "~utils/formatters";
 
 const title = "Sign up for a Circle account";
 

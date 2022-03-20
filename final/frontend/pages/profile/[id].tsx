@@ -3,7 +3,8 @@ import { useContext, useEffect, useState } from "react";
 import { SessionContext } from "~pages/_app";
 import Error from "next/error";
 import { Table } from "reactstrap";
-import { getAgeInYears } from "~utils/getAgeInYears";
+import { getAgeInYears, getBirthday, getGenderName } from "~utils/formatters";
+import { Post } from "~components/Post";
 
 const title = "User Profile";
 
@@ -33,19 +34,14 @@ export default function Profile() {
   }, [id, user, user?.token]);
 
   useEffect(() => {
-    if (user && id) {
-      fetch(`/api/user/${id}/posts`, {
-        headers: {
-          Authorization: `Bearer ${user.token}`,
-          ContentType: "application/json",
-        },
-      })
+    if (id) {
+      fetch(`/api/user/${id}/posts`)
         .then((res) => res.json())
         .then((data) => {
           setUserPosts(data);
         });
     }
-  }, [userDetail, user, id]);
+  }, [id]);
 
   if (!user)
     return (
@@ -62,8 +58,8 @@ export default function Profile() {
         <Table>
           <tbody>
             <tr>
-              <td>User ID</td>
-              <td>{userDetail.id}</td>
+              <td>Name</td>
+              <td>{`${userDetail.first_name} ${userDetail.last_name}`}</td>
             </tr>
             <tr>
               <td>Username</td>
@@ -73,30 +69,31 @@ export default function Profile() {
               <td>Email</td>
               <td>{userDetail.email}</td>
             </tr>
-            <tr>
-              <td>Name</td>
-              <td>{`${userDetail.first_name} ${userDetail.last_name}`}</td>
-            </tr>
-            <tr>
-              <td>Age</td>
-              <td>{getAgeInYears(userDetail.profile?.birthday)}</td>
-            </tr>
+            {userDetail.profile && (
+              <>
+                <tr>
+                  <td>Gender</td>
+                  <td>{getGenderName(userDetail.profile.gender)}</td>
+                </tr>
+                <tr>
+                  <td>Age</td>
+                  <td>{getAgeInYears(userDetail.profile.birthday)}</td>
+                </tr>
+                <tr>
+                  <td>Birthday</td>
+                  <td>{getBirthday(userDetail.profile.birthday)}</td>
+                </tr>
+              </>
+            )}
           </tbody>
         </Table>
       )}
       {userPosts?.length > 0 && (
         <>
           {userDetail?.id === user.id ? <h2>My Posts</h2> : <h2>User Posts</h2>}
-          <Table>
-            <tbody>
-              {userPosts.map((post) => (
-                <tr key={post.id}>
-                  <td>{post.created_at}</td>
-                  <td>{post.body}</td>
-                </tr>
-              ))}
-            </tbody>
-          </Table>
+          {userPosts.map((post) => (
+            <Post key={post.id} post={post} />
+          ))}
         </>
       )}
     </>

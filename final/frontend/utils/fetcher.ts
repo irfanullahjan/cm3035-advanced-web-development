@@ -1,4 +1,4 @@
-import { CSRF_COOKIE_NAME } from "~constants/strings";
+import { CSRF_COOKIE_NAME } from "~constants/general";
 import { getCookie } from "./getCookie";
 
 export const fetcher = async (...args: Parameters<typeof fetch>) => {
@@ -10,7 +10,7 @@ export const fetcher = async (...args: Parameters<typeof fetch>) => {
   headers = new Headers({
     ...headers,
     'Content-Type': 'application/json',
-    'X-CSRF-Token': getCookie(CSRF_COOKIE_NAME)
+    'X-CSRFToken': getCookie(CSRF_COOKIE_NAME)
   });
 
   // add headers to args
