@@ -38,39 +38,47 @@ export const NavbarTop = () => {
     router.push("/");
   };
 
+  const links = [
+    {
+      href: "/lobby",
+      text: "Lobby",
+    },
+    {
+      href: "/requests",
+      text: "Requests",
+    },
+    {
+      href: "/friends",
+      text: "Friends",
+    },
+    {
+      href: "/profile",
+      text: "Profile",
+    },
+  ];
+
   return (
     <Navbar color="dark" dark expand="md">
       <NavbarBrand
         onClick={() => router.push("/")}
         style={{ cursor: "pointer" }}
       >
-        〇 Circle
+        ● Circle
       </NavbarBrand>
       <NavbarToggler onClick={toggle} />
       <Collapse isOpen={isMenuOpen} navbar>
         <Nav className="mr-auto" navbar>
           {user ? (
             <>
-              <NavItem>
-                <Link href="/lobby" passHref>
-                  <NavLink>Lobby</NavLink>
-                </Link>
-              </NavItem>
-              <NavItem>
-                <Link href="/requests" passHref>
-                  <NavLink>Requests</NavLink>
-                </Link>
-              </NavItem>
-              <NavItem>
-                <Link href="/friends" passHref>
-                  <NavLink>Friends</NavLink>
-                </Link>
-              </NavItem>
-              <NavItem>
-                <Link href={`/profile/${user.id}`} passHref>
-                  <NavLink>Profile</NavLink>
-                </Link>
-              </NavItem>
+              {links.map((link) => (
+                <NavItem key={link.href}>
+                  <Link href={link.href} passHref>
+                    <NavLink active={router.asPath === link.href}>
+                      {link.text}
+                    </NavLink>
+                  </Link>
+                </NavItem>
+              ))}
               <NavItem>
                 <NavLink href="/" onClick={handleClickLogout}>
                   Logout
@@ -81,8 +89,12 @@ export const NavbarTop = () => {
                     <p>Are you sure you want to logout?</p>
                   </ModalBody>
                   <ModalFooter>
-                    <Button onClick={handleLogout} color="danger">Yes, Logout</Button>
-                    <Button onClick={() => setShowLogoutModal(false)}>Cancel</Button>
+                    <Button onClick={handleLogout} color="danger">
+                      Yes, Logout
+                    </Button>
+                    <Button onClick={() => setShowLogoutModal(false)}>
+                      Cancel
+                    </Button>
                   </ModalFooter>
                 </Modal>
               </NavItem>

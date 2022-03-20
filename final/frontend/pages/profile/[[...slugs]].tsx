@@ -3,7 +3,7 @@ import { useContext, useEffect, useState } from "react";
 import { SessionContext } from "~pages/_app";
 import Error from "next/error";
 import { Table } from "reactstrap";
-import { formatDayMonth, getAgeInYears, getBirthday, getGenderName } from "~utils/formatters";
+import { formatDayMonth, getAgeInYears, getGenderName } from "~utils/formatters";
 import { Post } from "~components/Post";
 
 const title = "User Profile";
@@ -12,11 +12,17 @@ export default function Profile() {
   const { user } = useContext(SessionContext);
 
   const router = useRouter();
-  const { id } = router.query;
+
+  // slugs is an array of strings from url of the form: /profile/:slug1/:slug2/...
+  const { slugs } = router.query;
+
+  // if no slugs, then user is viewing their own profile
+  const id = slugs?.[0] ?? user.id
 
   const [userDetail, setUserDetail] = useState<any>(null);
 
   const [userPosts, setUserPosts] = useState<{}[]>([]);
+
 
   useEffect(() => {
     if (id && user) {
