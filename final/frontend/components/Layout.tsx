@@ -1,14 +1,5 @@
-import {
-  Col,
-  Container,
-  Nav,
-  Navbar,
-  NavbarText,
-  NavItem,
-  Row,
-} from 'reactstrap';
-import { NavbarTop } from './NavbarTop';
-import Link from 'next/link';
+import { Col, Container, Row } from "reactstrap";
+import { NavbarTop } from "./NavbarTop";
 
 type Props = {
   children: JSX.Element;
@@ -27,10 +18,10 @@ export function Layout(props: Props) {
           </Row>
         </Container>
       </div>
-      <div style={{ flex: '1 0 auto' }}>
+      <div style={{ flex: "1 0 auto" }}>
         <Container>
           <Row>
-            <Col className='py-4'>{children}</Col>
+            <Col className="py-4">{children}</Col>
           </Row>
         </Container>
       </div>

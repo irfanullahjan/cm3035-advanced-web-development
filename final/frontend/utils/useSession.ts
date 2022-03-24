@@ -1,20 +1,15 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
 
 export function useSession() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const loadSession = async () => {
-    const jwt = true;
-    if (jwt) {
-      const res = await fetch('/api/user/current');
-      if (res.status === 200) {
-        const userJson = await res.json();
-        if (userJson.id) {
-          setUser({ ...userJson, token: jwt });
-        } else {
-          setUser(null);
-        }
+  const updateSession = async () => {
+    const res = await fetch("/api/user/current");
+    if (res.status === 200) {
+      const userJson = await res.json();
+      if (userJson.id) {
+        setUser(userJson);
       } else {
         setUser(null);
       }
@@ -25,15 +20,11 @@ export function useSession() {
   };
 
   useEffect(() => {
-    loadSession();
+    updateSession();
   }, []);
 
-  const updateSession = () => {
-    loadSession();
-  };
-
   const logout = async () => {
-    await fetch('/api/user/logout');
+    await fetch("/api/user/logout");
     setUser(null);
   };
 

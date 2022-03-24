@@ -75,7 +75,7 @@ export default function Friends() {
         </Form>
       </FormikProvider>
       <br />
-      {searchResults.length > 0 && (
+      {searchResults.length > 0 ? (
         <>
           <h3>Search results</h3>
           <Table>
@@ -124,6 +124,8 @@ export default function Friends() {
             >{`Show ${showMore ? "less" : "more"}`}</Button>
           )}
         </>
+      ) : (
+        <p>No results found, try searching for a different username.</p>
       )}
       <br />
       <br />
@@ -145,7 +147,11 @@ export default function Friends() {
                   <td>{`${friend.user.first_name} ${friend.user.last_name}`}</td>
                   <td>{formatDayMonth(friend.birthday)}</td>
                   <td>{friend.user.email}</td>
-                  <td><Link href={`/profile/${friend.user.id}`}>View Profile</Link></td>
+                  <td>
+                    <Link href={`/profile/${friend.user.id}`}>
+                      View Profile
+                    </Link>
+                  </td>
                 </tr>
               ))}
             </tbody>

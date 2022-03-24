@@ -27,11 +27,6 @@ export const NavbarTop = () => {
 
   const router = useRouter();
 
-  const handleClickLogout = (event: React.SyntheticEvent<HTMLElement>) => {
-    event.preventDefault();
-    setShowLogoutModal(true);
-  };
-
   const handleLogout = () => {
     setShowLogoutModal(false);
     logout();
@@ -80,7 +75,10 @@ export const NavbarTop = () => {
                 </NavItem>
               ))}
               <NavItem>
-                <NavLink href="/" onClick={handleClickLogout}>
+                <NavLink href="/" onClick={event => {
+                  event.preventDefault();
+                  setShowLogoutModal(true);
+                }}>
                   Logout
                 </NavLink>
                 <Modal isOpen={showLogoutModal}>

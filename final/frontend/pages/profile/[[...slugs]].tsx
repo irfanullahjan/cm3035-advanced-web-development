@@ -17,7 +17,7 @@ export default function Profile() {
   const { slugs } = router.query;
 
   // if no slugs, then user is viewing their own profile
-  const id = slugs?.[0] ?? user.id
+  const id = slugs?.[0] ?? user?.id
 
   const [userDetail, setUserDetail] = useState<any>(null);
 

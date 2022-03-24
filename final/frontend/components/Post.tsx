@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { formatDate } from "~utils/formatters";
 
 type PostProps = {
@@ -13,7 +14,7 @@ export function Post(props: PostProps) {
       {post.body}
       <br />
       <small className="text-muted">
-        by {post.username} on {formatDate(post.created_at)}
+        by <Link href={`/profile/${post.user.id}`}>{post.user.username}</Link> on {formatDate(post.created_at)}
       </small>
     </div>
   );

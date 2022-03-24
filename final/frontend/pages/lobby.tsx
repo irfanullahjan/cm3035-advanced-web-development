@@ -90,7 +90,7 @@ export default function Lobby() {
       <FormikProvider value={formik}>
         <Form>
           <FormikInput label="Message" name="message" type="text" />
-          <Button type="submit">Send</Button>
+          <Button type="submit" color="primary">Send</Button>
         </Form>
       </FormikProvider>
     </div>

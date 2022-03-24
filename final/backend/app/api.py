@@ -75,7 +75,7 @@ class FindUsersByUsername(generics.ListAPIView):
         # only authenticated users have user details
         permissions.IsAuthenticated
     ]
-    serializer_class = UserSerializer
+    serializer_class = UserSerializerRestricted # we need to restrict because search results to only include basic user info
 
     def get_queryset(self):
         search_text = self.kwargs['search_text']

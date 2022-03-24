@@ -3,6 +3,7 @@ import { useContext } from "react";
 import { Button, Table } from "reactstrap";
 import { SessionContext } from "~pages/_app";
 import { fetcher } from "~utils/fetcher";
+import { getGenderName } from "~utils/formatters";
 
 export default function Requests() {
   const { user, updateSession } = useContext(SessionContext);
@@ -26,8 +27,8 @@ export default function Requests() {
     );
   }
 
-  const received = user?.friend_requests_received;
-  const sent = user?.friend_requests_sent;
+  const received: { [key: string]: any }[] = user?.friend_requests_received;
+  const sent: { [key: string]: any }[] = user?.friend_requests_sent;
 
   return (
     <>
@@ -36,16 +37,18 @@ export default function Requests() {
         <Table>
           <thead>
             <tr>
+              <th>Name</th>
               <th>Username</th>
-              <th>Email</th>
+              <th>Gender</th>
               <th />
             </tr>
           </thead>
           <tbody>
             {received.map(({ id, sender }) => (
               <tr key={sender.username}>
+                <td>{sender.first_name} {sender.last_name}</td>
                 <td>{sender.username}</td>
-                <td>{sender.email}</td>
+                <td>{getGenderName(sender.profile.gender)}</td>
                 <td>
                   <Button onClick={() => acceptRequest(id)}>Accept</Button>
                 </td>
@@ -61,18 +64,31 @@ export default function Requests() {
         <Table>
           <thead>
             <tr>
+              <th>Name</th>
               <th>Username</th>
-              <th>Email</th>
+              <th>Gender</th>
               <th />
             </tr>
           </thead>
           <tbody>
             {sent.map(({ receiver }) => (
               <tr key={receiver.id}>
-                <td>{receiver.username}</td>
-                <td>{receiver.email}</td>
                 <td>
-                  <Button>Revoke</Button>
+                  {receiver.first_name} {receiver.last_name}
+                </td>
+                <td>{receiver.username}</td>
+                <td>{getGenderName(receiver.profile.gender)}</td>
+                <td>
+                  <Button
+                    color="danger"
+                    onClick={() =>
+                      alert(
+                        "Sorry, revoking friend request is not currently supported."
+                      )
+                    }
+                  >
+                    Revoke
+                  </Button>
                 </td>
               </tr>
             ))}
