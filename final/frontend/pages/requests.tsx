@@ -12,7 +12,7 @@ export default function Requests() {
     fetcher(`/api/request/${id}/accept`, {
       method: "DELETE",
     }).then((res) => {
-      if (res.status === 200) {
+      if (res.status === 204) {
         updateSession();
       }
     });
@@ -50,7 +50,7 @@ export default function Requests() {
                 <td>{sender.username}</td>
                 <td>{getGenderName(sender.profile.gender)}</td>
                 <td>
-                  <Button onClick={() => acceptRequest(id)}>Accept</Button>
+                  <Button onClick={() => acceptRequest(id)} color="primary">Accept</Button>
                 </td>
               </tr>
             ))}

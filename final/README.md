@@ -21,7 +21,7 @@ As mentioned above, Next.js is based **React.js** which is an open-source fronte
 The application code is organized as a monorepo i.e. a single Git repository constaining both frontend and backend applications.
 
 | Module  | Directory   |
-|---------|-------------|
+| ------- | ----------- |
 | Django  | `/backend`  |
 | Next.js | `/frontend` |
 
@@ -107,10 +107,10 @@ Another thing I had to really be careful about is control over what data is visi
 
 To do that I used different serializers
 
-
 ## Tests
 
-I opted to perform integration testing rather than 
+I decided to focus on integration testing because our app has a lot of moving parts i.e. Django, Next.js and Redis. For this, I untilized
+Cypress.
 
 ## Possible improvements
 
@@ -119,3 +119,11 @@ There is room for a ton of improvements that could be made to the applications. 
 1. The app still doesn't support a number of features that a basic social network is expected to provided. For example, ability to edit profile once signed up, edit posts, add images and other media to posts, retaining a history of messages in the database, ability to restrict the privacy of past posts, peer to peer messaging, etc.
 
 1. While we have restricted the users to only see their own posts or their friends however the frontend still makes unnecessary calls to `/user/{id}/posts` endpoint even if the profile being viewed is not a friend of the user. This could be prevented by adding another check in the `useEffect()` hook.
+
+## Conclusion and self evaluation
+
+Throughout this project, I faced challenges that at times were almost frustrating at times but finding solutions helped me learn new concepts and new ways to handle those scenarious. Django and Django Rest Framework (DRF) have proved to be really really powerful tools and an excellent framework for web development. I must say that DRF abstracts away a lot of the data flow and even thought it makes it a bit difficult to learn, this also makes it quite powerful in terms of how much we can achieve with so little code.
+
+I am specially fond of how we can use different serializers to control how much information from the same model so show to different groups of users. I am still curious about whether DRF and Django automatically optimizes the database queries when e.g. we only take a subset of fields from the model, and I hope to investigate this e.g. using Django toolbar.
+
+Regarding my performance in this project, I beleive due to the breadth of this application with all its backend and frontend logic, I got a bit disoriented due to lack of detailed planning. This meant that I couldn't focus on the core feacher that I needed to do. It would have been a lot better if I did those really really well and polished them. Instead I jumped around between different features and even though the app does quite many things, and the APIs are quite detailed with different layers of permissions, there are a lot of places, where the app has been left unfinished.

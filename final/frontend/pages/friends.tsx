@@ -12,7 +12,7 @@ import { formatDayMonth, getAgeInYears } from "~utils/formatters";
 const title = "Find friends";
 
 export default function Friends() {
-  const { user } = useContext(SessionContext);
+  const { user, updateSession } = useContext(SessionContext);
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [showMore, setShowMore] = useState(false);
 
@@ -30,9 +30,6 @@ export default function Friends() {
     onSubmit: (values) => {
       fetch(`/api/user/${values.searchText}`, {
         method: "GET",
-        headers: {
-          Authorization: `Bearer ${user.token}`,
-        },
       })
         .then((res) => res.json())
         .then((data) => {
@@ -52,12 +49,18 @@ export default function Friends() {
     );
   }
 
-  const sendFriendRequest = async (friendId: number) => {
-    await fetcher(`/api/request`, {
+  const sendFriendRequest = (friendId: number) => {
+    fetcher(`/api/request`, {
       method: "POST",
       body: JSON.stringify({
         receiver: friendId,
       }),
+    }).then((res) => {
+      if (res.status === 201) {
+        updateSession();
+      } else {
+        console.log("Error sending friend request");
+      }
     });
   };
 
@@ -102,9 +105,15 @@ export default function Friends() {
                       }
                     </td>
                     <td>
-                      {!user.friend_requests_sent?.find(
-                        (request) => request.receiver === result.id
-                      ) && (
+                      {user.profile.friends.find(
+                        (friend) => friend.id === result.id
+                      ) ? (
+                        "Already friend"
+                      ) : user.friend_requests_sent.find(
+                          (request) => request.receiver.id === result.id
+                        ) ? (
+                        "Request already sent"
+                      ) : (
                         <Button onClick={() => sendFriendRequest(result.id)}>
                           Send Friend Request
                         </Button>

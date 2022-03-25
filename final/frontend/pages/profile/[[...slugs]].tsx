@@ -2,14 +2,19 @@ import { useRouter } from "next/router";
 import { useContext, useEffect, useState } from "react";
 import { SessionContext } from "~pages/_app";
 import Error from "next/error";
-import { Table } from "reactstrap";
-import { formatDayMonth, getAgeInYears, getGenderName } from "~utils/formatters";
+import { Button, Table } from "reactstrap";
+import {
+  formatDayMonth,
+  getAgeInYears,
+  getGenderName,
+} from "~utils/formatters";
 import { Post } from "~components/Post";
+import { fetcher } from "~utils/fetcher";
 
 const title = "User Profile";
 
 export default function Profile() {
-  const { user } = useContext(SessionContext);
+  const { user, updateSession } = useContext(SessionContext);
 
   const router = useRouter();
 
@@ -17,12 +22,11 @@ export default function Profile() {
   const { slugs } = router.query;
 
   // if no slugs, then user is viewing their own profile
-  const id = slugs?.[0] ?? user?.id
+  const id = slugs?.[0] ?? user?.id;
 
   const [userDetail, setUserDetail] = useState<any>(null);
 
   const [userPosts, setUserPosts] = useState<{}[]>([]);
-
 
   useEffect(() => {
     if (id && user) {
@@ -57,6 +61,18 @@ export default function Profile() {
       />
     );
 
+  const unfriend = () => {
+    fetcher(`/api/user/${id}/unfriend`, {
+      method: "DELETE",
+    }).then((res) => {
+      if (res.status === 200) {
+        updateSession();
+      } else {
+        console.log("Error unfriending user");
+      }
+    });
+  };
+
   return (
     <>
       <h1>Profile</h1>
@@ -71,32 +87,52 @@ export default function Profile() {
               <td>Username</td>
               <td>{userDetail.username}</td>
             </tr>
-            <tr>
-              <td>Email</td>
-              <td>{userDetail.email}</td>
-            </tr>
+            {userDetail.email && (
+              <tr>
+                <td>Email</td>
+                <td>{userDetail.email}</td>
+              </tr>
+            )}
             {userDetail.profile && (
               <>
                 <tr>
                   <td>Gender</td>
                   <td>{getGenderName(userDetail.profile.gender)}</td>
                 </tr>
-                <tr>
-                  <td>Age</td>
-                  <td>{getAgeInYears(userDetail.profile.birthday)}</td>
-                </tr>
-                <tr>
-                  <td>Birthday</td>
-                  <td>{formatDayMonth(userDetail.profile.birthday)}</td>
-                </tr>
+                {userDetail.profile.birthday && (
+                  <>
+                    <tr>
+                      <td>Age</td>
+                      <td>
+                        {getAgeInYears(userDetail.profile.birthday)} years
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>Birthday</td>
+                      <td>{formatDayMonth(userDetail.profile.birthday)}</td>
+                    </tr>
+                  </>
+                )}
               </>
             )}
           </tbody>
         </Table>
       )}
+      {/* show friend or unfriend button */}
+      {user.profile.friends.find((friend) => friend.id === +id) ? (
+        <Button color="danger" className="mb-3">
+          Unfriend
+        </Button>
+      ) : (
+        user.id !== id && (
+          <Button color="primary" className="mb-3">
+            Friend
+          </Button>
+        )
+      )}
       {userPosts?.length > 0 && (
         <>
-          {userDetail?.id === user.id ? <h2>My Posts</h2> : <h2>User Posts</h2>}
+          {userDetail?.id === user.id ? <h2>My Posts</h2> : <h2>{userDetail.first_name}'s Posts</h2>}
           {userPosts.map((post) => (
             <Post key={post.id} post={post} />
           ))}

@@ -9,7 +9,6 @@ import { REFRESH_INTERVAL } from "~constants/general";
 import { SessionContext } from "~pages/_app";
 import { fetcher } from "~utils/fetcher";
 import { fetcherSwr } from "~utils/fetcherSwr";
-import { formatDate } from "~utils/formatters";
 
 const Home: NextPage = () => {
   const { user } = useContext(SessionContext);

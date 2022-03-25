@@ -75,7 +75,8 @@ class FindUsersByUsername(generics.ListAPIView):
         # only authenticated users have user details
         permissions.IsAuthenticated
     ]
-    serializer_class = UserSerializerRestricted # we need to restrict because search results to only include basic user info
+    # we need to restrict because search results to only include basic user info
+    serializer_class = UserSerializerRestricted
 
     def get_queryset(self):
         search_text = self.kwargs['search_text']
@@ -94,7 +95,7 @@ class UserPosts(generics.ListAPIView):
     serializer_class = PostSerializer
 
     def get_queryset(self):
-        userposts = Post.objects.filter(user=self.kwargs['id'])
+        userposts = Post.objects.filter(user=self.kwargs['id']).order_by('-created_at')
 
         # if the current user is the owner
         if self.request.user.id == self.kwargs['id']:
@@ -104,12 +105,10 @@ class UserPosts(generics.ListAPIView):
         if self.request.user.profile.friends.filter(id=self.kwargs['id']).exists():
             return userposts
 
-        # else return nothing
+        # else deny
         self.permission_denied(self.request)
 
 # friends by user id
-
-
 class UserFriends(generics.ListAPIView):
     model = User
     permission_classes = [
@@ -134,11 +133,9 @@ class CreateAndListPosts(generics.CreateAPIView, generics.ListAPIView):
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
+    # return all posts for the current user and their friends
     def get_queryset(self):
-        users_posts_query = Post.objects.filter(user=self.request.user)
-        friends_posts_query = Post.objects.filter(
-            user__profile__friends=self.request.user.profile)
-        return (users_posts_query | friends_posts_query).order_by('-created_at')
+        return (Post.objects.filter(user__profile__in=self.request.user.profile.friends.all()) | Post.objects.filter(user=self.request.user)).order_by('-created_at')
 
 
 class CreateFriendRequest(generics.CreateAPIView):
@@ -149,10 +146,24 @@ class CreateFriendRequest(generics.CreateAPIView):
     ]
     serializer_class = FriendRequestSerializer
 
+    def create(self, request, *args, **kwargs):
+
+        # if already friends
+        if request.user.profile.friends.filter(id=request.data['receiver']).exists():
+            return JsonResponse({'error': 'Cannot send a friend request to a friend'}, status=400)
+
+        # if request already sent
+        if FriendRequest.objects.filter(sender=request.user, receiver=request.data['receiver']).exists():
+            return JsonResponse({'error': 'You have already sent a request to this user'}, status=400)
+
+        # if request already received
+        if FriendRequest.objects.filter(sender=request.data['receiver'], receiver=request.user).exists():
+            return JsonResponse({'error': 'You have already received a friend request from this user'}, status=400)
+
+        return super().create(request, *args, **kwargs)
+
     def perform_create(self, serializer):
         serializer.save(sender=self.request.user)
-
-# accept friend request
 
 
 class AcceptFriendRequest(generics.DestroyAPIView):
