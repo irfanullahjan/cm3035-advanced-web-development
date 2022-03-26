@@ -1,3 +1,4 @@
+from distutils.command.upload import upload
 from django.db import models
 from django.contrib.auth.models import User
 
@@ -19,6 +20,7 @@ class Profile(models.Model):
         ('O', 'Other')
     ]
     user = models.OneToOneField(User, on_delete=models.CASCADE)
+    avatar = models.ImageField(upload_to='static/avatars', null=True, blank=True)
     friends = models.ManyToManyField('self', blank=True)
     birthday = models.DateField(null=True, blank=True)
     gender = models.CharField(

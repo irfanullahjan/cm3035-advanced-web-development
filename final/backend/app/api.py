@@ -17,6 +17,14 @@ class CreateUser(generics.CreateAPIView):
     serializer_class = UserSerializer
     fields = '__all__'
 
+    def perform_create(self, serializer):
+        # remove properties that are not in the serializer
+        # this is a workaround for a bug in rest_framework
+        serializer.validated_data.pop('groups')
+        serializer.validated_data.pop('user_permissions')
+        serializer.validated_data.pop('is_staff')
+        serializer.validated_data.pop('is_active')
+        super().perform_create(serializer)
 
 class UserLogin(APIView):
     def post(self, request):

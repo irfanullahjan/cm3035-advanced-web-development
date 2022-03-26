@@ -14,8 +14,10 @@ export const fetcher = async (input: RequestInfo, init?: RequestInit) => {
   // if content type is not set, set it to application/json
   if (!headers.has("Content-Type")) {
     headers.set("Content-Type", "application/json");
+  } else if (headers.get("Content-Type")?.includes("multipart/form-data")) {
+    // we unset the form data to let the browser set it with the correct form boundary
+    headers.delete("Content-Type");
   }
-
   // if csrf token is not set, add it to headers
   if (!headers.has(CSRF_HEADER_NAME)) {
     headers.set(CSRF_HEADER_NAME, getCookie(CSRF_COOKIE_NAME));

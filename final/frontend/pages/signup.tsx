@@ -5,6 +5,7 @@ import { Button, Col, Container, FormGroup, Row, Spinner } from "reactstrap";
 import { FormikInput } from "~components/FormikInput";
 import { genderCodeGroup } from "~constants/codeGroups";
 import { SessionContext } from "~pages/_app";
+import { fetcher } from "~utils/fetcher";
 import { getAgeInYears } from "~utils/formatters";
 
 const title = "Sign up for a Circle account";
@@ -27,6 +28,7 @@ export default function Signup() {
     profile: {
       birthday?: string;
       gender?: string;
+      avatar?: any;
     };
   }>({
     initialValues: {
@@ -39,6 +41,7 @@ export default function Signup() {
       profile: {
         birthday: "",
         gender: "",
+        avatar: "",
       },
     },
     onSubmit: async (values) => {
@@ -48,12 +51,25 @@ export default function Signup() {
           ...values,
         };
         delete formData.verifyPassword;
-        const res = await fetch("/api/user", {
+        const multipartFormData = new FormData();
+        Object.keys(formData).forEach((key) => {
+          if (key === "profile") {
+            Object.keys(formData.profile).forEach((profileKey) => {
+              multipartFormData.append(
+                `profile.${profileKey}`,
+                formData.profile[profileKey]
+              );
+            });
+          } else {
+            multipartFormData.append(key, formData[key]);
+          }
+        });
+        const res = await fetcher("/api/user", {
           method: "POST",
           headers: {
-            "Content-Type": "application/json",
+            "Content-Type": "multipart/form-data", // form boundry is automatically added in utils/fetcher
           },
-          body: JSON.stringify(formData),
+          body: multipartFormData,
         });
         if (res.status === 201) {
           setFormFeedback({
@@ -123,8 +139,6 @@ export default function Signup() {
     },
   });
 
-  console.log(formik.values);
-
   if (user) {
     if (!formFeedback) {
       setFormFeedback({
@@ -190,9 +204,16 @@ export default function Signup() {
               </Col>
             </Row>
           </Container>
-
-          {/* <FormikInput type='file' name='picture' label='Profile picture' /> */}
-
+          Profile photo:{' '}
+          <input
+            name="profile.avatar"
+            type="file"
+            onChange={(event) => {
+                formik.setFieldValue("profile.avatar", event.target.files?.[0]);
+            }}
+          />
+          <br />
+          <br />
           <Button type="submit" color="primary">
             Signup {formik.isSubmitting && <Spinner size="sm" color="light" />}
           </Button>
