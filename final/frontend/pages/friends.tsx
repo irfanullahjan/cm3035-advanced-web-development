@@ -67,7 +67,7 @@ export default function Friends() {
 
   return (
     <>
-      <h1>Find Friends</h1>
+      <h2>Find Friends</h2>
       <FormikProvider value={formik}>
         <Form>
           <FormikInput name="searchText" label="Search by username" />
@@ -143,7 +143,7 @@ export default function Friends() {
       <br />
       {friends.length > 0 && (
         <>
-          <h1>Friends</h1>
+          <h2>Friends</h2>
           <Table>
             <thead>
               <tr>
