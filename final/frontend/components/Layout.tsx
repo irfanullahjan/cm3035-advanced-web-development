@@ -1,5 +1,5 @@
 import { Col, Container, Row } from "reactstrap";
-import { NavbarTop } from "./NavbarTop";
+import { Navbar } from "./Navbar";
 
 type Props = {
   children: JSX.Element;
@@ -13,7 +13,7 @@ export function Layout(props: Props) {
         <Container>
           <Row>
             <Col>
-              <NavbarTop />
+              <Navbar />
             </Col>
           </Row>
         </Container>

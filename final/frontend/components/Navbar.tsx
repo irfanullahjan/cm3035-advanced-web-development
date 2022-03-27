@@ -1,11 +1,10 @@
 import React, { useContext, useState } from "react";
-import Link from "next/link";
 import {
   Collapse,
   Nav,
   NavItem,
   NavLink,
-  Navbar,
+  Navbar as RsNavbar,
   NavbarBrand,
   NavbarToggler,
   Modal,
@@ -16,12 +15,13 @@ import {
 } from "reactstrap";
 import { SessionContext } from "~pages/_app";
 import { useRouter } from "next/dist/client/router";
+import { NavbarLinks } from "./NavbarLinks";
 
-export const NavbarTop = () => {
+export const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
 
-  const { user, updateSession, logout } = useContext(SessionContext);
+  const { user, logout } = useContext(SessionContext);
 
   const toggle = () => setIsMenuOpen(!isMenuOpen);
 
@@ -33,7 +33,7 @@ export const NavbarTop = () => {
     router.push("/");
   };
 
-  const links = [
+  const authenticatedLinks = [
     {
       href: "/lobby",
       text: "Lobby",
@@ -52,8 +52,19 @@ export const NavbarTop = () => {
     },
   ];
 
+  const unauthenticatedLinks = [
+    {
+      href: "/login",
+      text: "Login",
+    },
+    {
+      href: "/signup",
+      text: "Signup",
+    },
+  ];
+
   return (
-    <Navbar color="dark" dark expand="md">
+    <RsNavbar color="dark" dark expand="md">
       <NavbarBrand
         onClick={() => router.push("/")}
         style={{ cursor: "pointer" }}
@@ -65,17 +76,9 @@ export const NavbarTop = () => {
         <Nav className="mr-auto" navbar>
           {user ? (
             <>
-              {links.map((link) => (
-                <NavItem key={link.href}>
-                  <Link href={link.href} passHref>
-                    <NavLink active={router.asPath === link.href}>
-                      {link.text}
-                    </NavLink>
-                  </Link>
-                </NavItem>
-              ))}
+              <NavbarLinks links={authenticatedLinks} />
               <NavItem>
-                <NavLink href="/" onClick={event => {
+                <NavLink href="/logout" onClick={event => {
                   event.preventDefault();
                   setShowLogoutModal(true);
                 }}>
@@ -98,21 +101,10 @@ export const NavbarTop = () => {
               </NavItem>
             </>
           ) : (
-            <>
-              <NavItem>
-                <Link href="/signup" passHref>
-                  <NavLink>Signup</NavLink>
-                </Link>
-              </NavItem>
-              <NavItem>
-                <Link href="/login" passHref>
-                  <NavLink>Login</NavLink>
-                </Link>
-              </NavItem>
-            </>
+            <NavbarLinks links={unauthenticatedLinks} />
           )}
         </Nav>
       </Collapse>
-    </Navbar>
+    </RsNavbar>
   );
 };

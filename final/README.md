@@ -22,8 +22,8 @@ The application code is organized as a monorepo i.e. a single Git repository con
 
 | Module  | Directory   |
 | ------- | ----------- |
-| Django  | `/backend`  |
-| Next.js | `/frontend` |
+| Django  | `final/backend`  |
+| Next.js | `final/frontend` |
 
 The Django project itself further contains separate sites for:
 
@@ -114,6 +114,8 @@ The included sqlite database has the following users that maybe used to test the
 
 ## Models and data structure
 
+The core backend models and API is defined in `backend/app`.
+
 Since the Django framework has the `User` model built in, I decided to use that initially to gain experience and if the doesn't fullfil my needs, I planned to use my own model. However it worked pretty well except that it doesn't come with fields such as user's friends, and user's profile picture etc. For that I created `Profile` model which I linked to the `User` model via a `OneToOneField`. This is the Django recommended way. When the user signs up, I collect as much user info as possible and populate both User and the linked Profile.
 
 I have the following fields on `Profile`:
@@ -133,15 +135,16 @@ Finally, I have `Post` model which lets the users post status updates. Currently
 
 ## REST API and other endpoints
 
+
 ## Form handling
 
 Being a single page application (SPA), the forms and other actions are submitted via AJAX as `application/json` in most cases, except where complex data such as files are submitted along with other info, in which case I submit the form as `multipart/form-data`.
 
 In the frontend, the forms are handled using an excellent React.js library called [Formik](https://formik.org/). Since Next.js itself is built on top on React.js, we can use Formik with Next.js as well. Formik simplifies React.js forms because it encapsultes the form state and simplifies JSX syntax of the forms dramatcially compared to raw React.js forms by using a React.js feature called [Context](https://reactjs.org/docs/context.html).
 
-I have a custom `FormikInput` component at location `/frontend/components` and in there I get the form input's `onChange` handlers and other details using a React hook called `useField`. This component then simply from the React context knows the form it is included in and lets the formik handle it state using `name` prop.
+I have a custom `FormikInput` component at location `frontend/components` and in there I get the form input's `onChange` handlers and other details using a React hook called `useField`. This component then simply from the React context knows the form it is included in and lets the formik handle it state using `name` prop.
 
-Formik then calls appropriate methods I passdd into `useFormik` hook e.g. onSubmit based on user actions. 
+Formik then calls appropriate methods I passdd into `useFormik` hook e.g. `onSubmit` based on user actions. 
 
 ### Validation
 
@@ -228,6 +231,10 @@ export function FormikInput(props: Props) {
 }
 ```
 
+Here is a screenshot of frontend form validation:
+
+![Frontend form validation screenshot](readme/validation.png)
+
 ## Authentication
 
 Initially I used Json Web Token (JWT) authentication based on [Simple JWT](https://django-rest-framework-simplejwt.readthedocs.io/en/latest/) and it worked pretty well except that I had to set the token in the request header. However, later I found out that Django channels doesn't populate the user in `request.scope` with token authentication. Instead it only supports Django's built-in session authentication. So I decided to replace JWT with Django session authentication. With SSL / HTTPS, session authentication should be pretty safe. Once drawback of using session auth. is that the server has to store all the sessions that have been created, where as in token based authentication the server creates the login token and then token itself can be verified for authenticity because it is encrypted using the private key of the issuer and anyone can read using the public key of the issuer. But no one can fake it because private key of the issue is needed to create one.
@@ -236,22 +243,72 @@ While, I could have embeded the user details within the stringified message sent
 
 ## Frontend navigation, layout and authentication
 
-On the frontend, Next.js handles the rounting between pages beautifully. It has this concept of pages that reside at `/frontend/pages` and Next.js scans this directory on app startup and registers routes based on the file and folder structures. It looks for default exported JSX components and treats them as pages. So if we have such a component located at `frontend/pages/login.tsx` it will be accessible as a page at relative URL of `/login`.
+On the frontend, Next.js handles the rounting between pages beautifully. It has this concept of pages that reside at `frontend/pages` and Next.js scans this directory on app startup and registers routes based on the file and folder structures. It looks for default exported JSX components and treats them as pages. So if we have such a component located at `frontend/pages/login.tsx` it will be accessible as a page at relative URL of `/login`. Next.js also supports [dynamic routes](https://nextjs.org/docs/routing/dynamic-routes) which I have used for Profile page.
 
-For the UI, I used a React.js library [Reactstrap](https://reactstrap.github.io/) for the popular [Bootstrap](https://getbootstrap.com/) library.
+We have the following routes / pages:
+
+- [Home](http://localhost:3000)
+- [Login](http://localhost:3000/login)
+- [Signup](http://localhost:3000/signup)
+- [Profile](http://localhost:3000/profile/{id})
+- [Friends](http://localhost:3000/friends)
+- [Requests](http://localhost:3000/requests)
+- [Lobby](http://localhost:3000/lobby)
+
+On the frontend, the session cookie is set automatically by the browser. However I do need to let all the pages in the app know whether the user is authenticated and a valid session exists. To do that, I have relied on [React Context](https://reactjs.org/docs/context.html) to share the user session state throughtout app. This is done in `frontend/pages/_app.tsx` where I have used a custom hook `useSession`, this hooks provides us the `user` object and `updateSession()` and `logout()` methods which may be called from anywhere in the application e.g. upon login and logout (please see `frontend/pages/login.tsx` and `frontend/components/Navbar.tsx`) to let the app update the user object with fresh data from server. This is then instantly made available throught the frontend app.
+
+For the UI, I used a React.js library [Reactstrap](https://reactstrap.github.io/) for the popular [Bootstrap](https://getbootstrap.com/) library. The Bootstrap styles are compiled on the fly using [Sass](https://sass-lang.com/). Even though I didn't yet customize the look and feel, we can easilty do so by overriding the default bootstrap Sass variables. More details [here](https://getbootstrap.com/docs/5.0/customize/sass/).
 
 ## Data access control
 
 Another thing I had to really be careful about is control over what data is visiable and modifiable for users. Since this is a social network, data belonging to many many users is stored in the same database tables so any REST endpoints that we create must not only require the users to be logged and authenticated but also, that they be only allowed to access the information they are meant to access and nothing else. For example, in this simple social network, a user should be able to see their own posts but not those posted by others unless they are friends.
 
-To do that I used different serializers
+To do that, I used different serializers e.g. `UserSerializer` for detailed information about the given user and their profile and `UserSerializerRestricted` for basic information e.g. when someone is not a friend with someone and their profile comes up in search results, we need to limited the information visible to protect the privacy of the user. Currently my serializers are not based on each other i.e. UserSerializer doesn't "extend" or inherit from the other. Ideally these serializers should be structures as layers i.e. each layer building on top of the restricted ones. Here is a good [example](https://stackoverflow.com/questions/49900629/django-serializer-inherit-and-extend-fields).
 
 ## Tests
 
-I decided to focus on integration testing because our app has a lot of moving parts i.e. Django, Next.js and Redis. For this, I untilized
-Cypress.
+I decided to focus on integration testing because our app has a lot of moving parts i.e. Django, Next.js and Redis. For this, I untilized Cypress. It is a library that can be used to automate the user actions e.g. clicks, form inputs etc. and these tests ensure that the application is behaving as expected and any functionality does not break down upon changes to other features.
 
-![Cypress testing screenshot](/final/readme/cypress.png)
+The following screenshot, for example, shows how the logout functionality is tested: 
+
+![Cypress testing screenshot](readme/cypress.png)
+
+And the code for above test looks like:
+
+```js
+describe("Authentication", () => {
+  const login = () => {
+    cy.visit("/login");
+    cy.get("input[name=username]").type("irfan");
+    cy.get("input[name=password]").type("adminadmin");
+    cy.get("button[type=submit]").click();
+    // wait for login
+    cy.wait(1500);
+  }
+
+  // ... more tests here...
+
+  it("should allow logout", () => {
+    login();
+    // click logout link with content "Logout"
+    cy.get('a').contains("Logout").click();
+    // wait for popup to show
+    cy.wait(1000);
+    // click yes logout on modal
+    cy.get('button').contains('Yes').click();
+    // user should see a login link
+    cy.get('a').contains("Login");
+  });
+});
+```
+
+These tests are located at `final/frontend/cypress` and can be run using the following command:
+
+```bash
+npm run cypress
+```
+
+For these tests to be pass, all the parts of the app must be running and integrated together, so plase ensure both the backend and the frontend app are running in the same environemnt and also Redis if chat tests are included in the test suite.
 
 ## Possible improvements
 
@@ -260,6 +317,12 @@ There is room for a ton of improvements that could be made to the applications. 
 1. The app still doesn't support a number of features that a basic social network is expected to provided. For example, ability to edit profile once signed up, edit posts, add images and other media to posts, retaining a history of messages in the database, ability to restrict the privacy of past posts, peer to peer messaging, etc.
 
 1. While we have restricted the users to only see their own posts or their friends however the frontend still makes unnecessary calls to `/user/{id}/posts` endpoint even if the profile being viewed is not a friend of the user. This could be prevented by adding another check in the `useEffect()` hook.
+
+1. In some cases, I read data from user object that is available as part of `SessionContext`. These include e.g. the friend requests sent and received. Such data should better be fetched from a separate endpoint because as the models get complex it will be a big database query for all the data to be fetched. Therefore the session should only be updated when need. Currently, the whole user objct is fetched even if we just need to update the list of friends.
+
+1. There are quite many TypeScript errors and warnings that need to be fixed by declaring the correct types. Also we have some console errors and warnings in the browser, which don't affect the functionality but should nevertheless be fixed because if we let the such errors and warnings build up, it will be difficult down the road to trace problems to their root causes and important errors may get difficult to find in a flood or errors in the console.
+
+1. The UI and user experince may be improved by displaying useful cues to the user about the application state. Since the app has so far only been tested locally, there didn't arise a huge need for things such as spinners because the server requests end up fulfilled instantly, however when deployed on a real server and accessed remotely, we need to display loading state e.g. when a friend request is being made to let the user know that their input is being processed, otherwise the user will continue clicking the button again and again. Similarly the form submit buttons should be disabled when a submission is in progress and so on.
 
 ## Conclusion and self evaluation
 
