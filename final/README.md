@@ -135,6 +135,8 @@ Finally, I have `Post` model which lets the users post status updates. Currently
 - `updated_at`: `DateTimeField` to record the timestamp wehn the post was last updated, however currently Post editing isn't supported
 - `user`: `ForeignKey` to link the post to User. Multiple posts may be created by a sinlge user.
 
+<div style="page-break-after: always;"></div>
+
 ## REST API and other endpoints
 
 Most of the API endpoints are defined in `backend/app/urls.py`. Most of the views return data as JSON and are build with Django Rest Framework (DRF). I have extensively utilized classed based views that extend DRF's generics.
@@ -153,6 +155,8 @@ Most of the API endpoints are defined in `backend/app/urls.py`. Most of the view
 | `api/request/<int:id>/accept` | DELETE | Deletes the friend request and registers `sender` and the `receiver` as each other's friends. |
 | `api/request/<int:id>/reject` | DELETE | Deletes the friend request and does nothing else i.e. doesn't add the two people as each other's friends. |
 | `api/post` | POST, GET | If method is POST, creates a new post and registers current user as foreign key. If method is GET, returns all the posts created by the requesting user or their friends, ordered most recent first. |
+
+<div style="page-break-after: always;"></div>
 
 ## Form handling and AJAX
 
@@ -176,13 +180,14 @@ The frontend validation improves the user experience a lot. On the frontend, I p
 
 Since the user receives instant feedback about whether the form is valid or invalid, it saves them the hassle of submitting an invalid form only to find out after page reload that the form is invalid. One downside of this approach is that there may be a mismatch between the frontend and backend validation rules. However the benefit far outweighs the disadvantages.
 
+<div style="page-break-after: always;"></div>
+
 Here is a simple example of login page form handling:
 
 ```ts
 // frontend/pages/login.tsx
 export default function Login() {
   // ... other code ...
-
   const formik = useFormik<{
     username: string;
     password: string;
@@ -229,12 +234,13 @@ export default function Login() {
 }
 ```
 
+<div style="page-break-after: always;"></div>
+
 ```ts
 // frontend/components/FormikInput.tsx
 export function FormikInput(props: Props) {
   const { label, name, type, options, ...otherProps } = props;
   const [{ value, ...field }, meta] = useField(name);
-
   const invalid = meta.touched && meta.error;
   return (
     <FormGroup floating>
