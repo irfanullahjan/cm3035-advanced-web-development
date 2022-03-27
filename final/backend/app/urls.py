@@ -11,5 +11,6 @@ urlpatterns = [
     path('api/user/<str:search_text>', api.FindUsersByUsername.as_view(), name='find-users-by-search-text'),
     path('api/request', api.CreateFriendRequest.as_view(), name='friend-request'),
     path('api/request/<int:id>/accept', api.AcceptFriendRequest.as_view(), name='friend-request-accept'),
+    path('api/request/<int:id>/reject', api.RejectFriendRequest.as_view(), name='friend-request-reject'),
     path('api/post', api.CreateAndListPosts.as_view(), name='create-post-and-list-posts'),
 ]

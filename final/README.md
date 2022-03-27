@@ -93,13 +93,131 @@ npm run dev
 
 ## Models and data structure
 
+Since the Django framework has the `User` model built in, I decided to use that initially to gain experience and if the doesn't fullfil my needs, I planned to use my own model. However it worked pretty well except that it doesn't come with fields such as user's friends, and user's profile picture etc. For that I created `Profile` model which I linked to the `User` model via a `OneToOneField`. This is the Django recommended way. When the user signs up, I collect as much user info as possible and populate both User and the linked Profile.
+
+I have the following fields on `Profile`:
+
+- `user`: `OneToOneField` links `Profile` to `User`
+- `avatar`: `ImageField` to store the details such as location on storage of the user's profile picture
+- `friends`: `ManyToManyField` relates users' profile to other users's profiles, meaning that they are friends
+- `birthday`: `DateField` date of birth of the user
+- `gender`: `CharField` stores the gender of the user e.g. F, M etc. I use an object that maps the values in the database to user friendly works such as `Female`, `Male` etc.
+
+In order to facilitate the users to add friends on the network, I created a model `FriendRequest` which allows the users to send someone a friend request and the receiving person is then able to accept if they wish. Upon accepting, the `FriendRequest` itself is deleted, however the two people are registered as friends with each other. The `FriendRequest` model has the following fields:
+
+- `receiver`: `ForeignKey` links to `User` recieving the request
+- `sender`: `ForeignKey` links to `user` sending the request
+
+Finally, I have `Post` model which lets the users post status updates. Currently I don't have ability to attach images to status updates but I plan to do that later
+
 ## REST API and other endpoints
+
+## Form handling
+
+Being a single page application (SPA), the forms and other actions are submitted via AJAX as `application/json` in most cases, except where complex data such as files are submitted along with other info, in which case I submit the form as `multipart/form-data`.
+
+In the frontend, the forms are handled using an excellent React.js library called [Formik](https://formik.org/). Since Next.js itself is built on top on React.js, we can use Formik with Next.js as well. Formik simplifies React.js forms because it encapsultes the form state and simplifies JSX syntax of the forms dramatcially compared to raw React.js forms by using a React.js feature called [Context](https://reactjs.org/docs/context.html).
+
+I have a custom `FormikInput` component at location `/frontend/components` and in there I get the form input's `onChange` handlers and other details using a React hook called `useField`. This component then simply from the React context knows the form it is included in and lets the formik handle it state using `name` prop.
+
+Formik then calls appropriate methods I passdd into `useFormik` hook e.g. onSubmit based on user actions. 
+
+### Validation
+
+Validation is performed both in the backend by Django and the Django Rest FrameWork and also in the fronedend using Formik.
+
+The frontend validation improves the user experience a lot. On the frontend, I pass in a validation method to `useFormik` that is then called by Formik on every change in user input. I designed the `FormikInput` component I discussed above, in such a way that it gets any validation error from Fromik through `useField` and then displays the error using Bootstrap (Reactstrap) error message component that styles these validation messages nicely.
+
+Since the user receives instant feedback about whether the form is valid or invalid, it saves them the hassle of submitting an invalid form only to find out after page reload that the form is invalid. One downside of this approach is that there may be a mismatch between the frontend and backend validation rules. However the benefit far outweighs the disadvantages.
+
+Here is a simple example of login page form handling:
+
+```ts
+// frontend/pages/login.tsx
+export default function Login() {
+  // ... other code ...
+
+  const formik = useFormik<{
+    username: string;
+    password: string;
+  }>({
+    initialValues: {
+      username: "",
+      password: "",
+    },
+    onSubmit: async (values) => {
+        // form submission logic
+    },
+    validate: (values) => {
+      const errors: FormikErrors<typeof values> = {};
+      if (!values.username) {
+        errors.username = "Username is required";
+      }
+      if (!values.password) {
+        errors.password = "Password is required";
+      }
+      return errors;
+    },
+  });
+  // ... other code ...
+  return (
+    <>
+      <h1>Login</h1>
+      <p>Please enter your credentials to login.</p>
+      <FormikProvider value={formik}>
+        <Form>
+          <FormikInput name="username" label="Username" />
+          <FormikInput type="password" name="password" label="Password" />
+          <Button type="submit" color="primary" disabled={!formik.isValid || formik.isSubmitting}>
+            Login {formik.isSubmitting && <Spinner size="sm" color="light" />}
+          </Button>
+          {formFeedback && (
+            <p className={`text-${formFeedback.accent} mt-3`}>
+              {formFeedback.message}
+            </p>
+          )}
+        </Form>
+      </FormikProvider>
+    </>
+  );
+}
+```
+
+```ts
+// frontend/components/FormikInput.tsx
+export function FormikInput(props: Props) {
+  const { label, name, type, options, ...otherProps } = props;
+  const [{ value, ...field }, meta] = useField(name);
+
+  const invalid = meta.touched && meta.error;
+  return (
+    <FormGroup floating>
+      <Input
+        type={type ?? 'text'}
+        invalid={!!invalid}
+        value={value ?? ''}
+        placeholder={label}
+        {...field}
+        {...otherProps}
+      />
+      <Label>{label}</Label>
+      {invalid && <FormFeedback>{meta.error}</FormFeedback>}
+    </FormGroup>
+  );
+}
+```
 
 ## Authentication
 
 Initially I used Json Web Token (JWT) authentication based on [Simple JWT](https://django-rest-framework-simplejwt.readthedocs.io/en/latest/) and it worked pretty well except that I had to set the token in the request header. However, later I found out that Django channels doesn't populate the user in `request.scope` with token authentication. Instead it only supports Django's built-in session authentication. So I decided to replace JWT with Django session authentication. With SSL / HTTPS, session authentication should be pretty safe. Once drawback of using session auth. is that the server has to store all the sessions that have been created, where as in token based authentication the server creates the login token and then token itself can be verified for authenticity because it is encrypted using the private key of the issuer and anyone can read using the public key of the issuer. But no one can fake it because private key of the issue is needed to create one.
 
 While, I could have embeded the user details within the stringified message sent via websockets, giving frontend that much control is not considered secure and obtaining the user from the request scope is way more safe because then it is difficult for a user to disguise themselve as being another user sending the message.
+
+## Frontend navigation, layout and authentication
+
+On the frontend, Next.js handles the rounting between pages beautifully. It has this concept of pages that reside at `/frontend/pages` and Next.js scans this directory on app startup and registers routes based on the file and folder structures. It looks for default exported JSX components and treats them as pages. So if we have such a component located at `frontend/pages/login.tsx` it will be accessible as a page at relative URL of `/login`.
+
+For the UI, I used a React.js library [Reactstrap](https://reactstrap.github.io/) for the popular [Bootstrap](https://getbootstrap.com/) library.
 
 ## Data access control
 
@@ -122,8 +240,10 @@ There is room for a ton of improvements that could be made to the applications. 
 
 ## Conclusion and self evaluation
 
-Throughout this project, I faced challenges that at times were almost frustrating at times but finding solutions helped me learn new concepts and new ways to handle those scenarious. Django and Django Rest Framework (DRF) have proved to be really really powerful tools and an excellent framework for web development. I must say that DRF abstracts away a lot of the data flow and even thought it makes it a bit difficult to learn, this also makes it quite powerful in terms of how much we can achieve with so little code.
+Throughout this project, I faced challenges that at times were almost frustrating but finding solutions for those issues helped me learn new concepts and new ways to handle those scenarious. Django and Django Rest Framework (DRF) have proved to be really really powerful tools and an excellent framework for web development. I must say that DRF abstracts away a lot of the data flow and even thought it makes it a bit difficult to learn, this also makes it quite powerful in terms of how much we can achieve with so little code.
 
 I am specially fond of how we can use different serializers to control how much information from the same model so show to different groups of users. I am still curious about whether DRF and Django automatically optimizes the database queries when e.g. we only take a subset of fields from the model, and I hope to investigate this e.g. using Django toolbar.
 
 Regarding my performance in this project, I beleive due to the breadth of this application with all its backend and frontend logic, I got a bit disoriented due to lack of detailed planning. This meant that I couldn't focus on the core feacher that I needed to do. It would have been a lot better if I did those really really well and polished them. Instead I jumped around between different features and even though the app does quite many things, and the APIs are quite detailed with different layers of permissions, there are a lot of places, where the app has been left unfinished.
+
+One very import lession I learned with respect to software development in general is to always throw detailed errors if something can't to processed, never to "eat up" the errors. This is because otherwise the developer using your library will have a really difficult time figuring out what is wrong. Case in point: I had an issue where the backed would return a 400 Bad Request response without any error in the logs. I even turned on details errors in Django app settings but it turned out the issue was at a layer a cbove Django app itself, actually Django Channels itself was rejected the request because the error boundry with my request of type `multipart/form-data` was malformated. Since, the Bad Request response wasn't acompanies by an error message, I had a really hard time resolving this one issue.

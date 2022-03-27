@@ -197,3 +197,20 @@ class AcceptFriendRequest(generics.DestroyAPIView):
 
     def get_queryset(self):
         return FriendRequest.objects.filter(receiver=self.request.user)
+
+class RejectFriendRequest(generics.DestroyAPIView):
+    model = FriendRequest
+    permission_classes = [
+        # only authenticated users can reject friend requests
+        permissions.IsAuthenticated
+    ]
+    serializer_class = FriendRequestSerializer
+    lookup_field = 'id'
+
+    def perform_destroy(self, instance):
+        instance.delete()
+
+        return JsonResponse({'success': 'Friend request rejected'})
+
+    def get_queryset(self):
+        return FriendRequest.objects.filter(receiver=self.request.user)
