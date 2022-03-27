@@ -67,10 +67,6 @@ docker run -p 6379:6379 redis
 
 To run redis locally without Docker, please follow [this guide](https://redis.io/topics/quickstart).
 
-#### Super user
-
-Currently the app doesn't function property if no superusers exists. Therefore please ensure there is a supersuer if running the app with a cleaned database.
-
 ```bash
 python3 manage.py createsuperuser
 ```
@@ -111,6 +107,7 @@ The included sqlite database has the following users that maybe used to test the
 | amna | adminadmin
 | arif | adminadmin
 
+The first user `admin` may be used to login to Django admin via URL: `http://localhost:8000/admin` to view the contents in the database and make quite modifications.
 
 ## Models and data structure
 
@@ -131,12 +128,33 @@ In order to facilitate the users to add friends on the network, I created a mode
 - `receiver`: `ForeignKey` links to `User` recieving the request
 - `sender`: `ForeignKey` links to `user` sending the request
 
-Finally, I have `Post` model which lets the users post status updates. Currently I don't have ability to attach images to status updates but I plan to do that later
+Finally, I have `Post` model which lets the users post status updates. Currently I don't have ability to attach images to status updates but I plan to do that later. `Post` is related to `User` via a foreign key because each user can have multiple posts. Fields on `Post` model:
+
+- `body`: `TextField` main text content of the post
+- `created_at`: `DateTimeField` to record the timestamp when the post was created
+- `updated_at`: `DateTimeField` to record the timestamp wehn the post was last updated, however currently Post editing isn't supported
+- `user`: `ForeignKey` to link the post to User. Multiple posts may be created by a sinlge user.
 
 ## REST API and other endpoints
 
+Most of the API endpoints are defined in `backend/app/urls.py`. Most of the views return data as JSON and are build with Django Rest Framework (DRF). I have extensively utilized classed based views that extend DRF's generics.
 
-## Form handling
+| Endpoint | HTTP Methods | Description |
+| ----| --- | --- |
+| `api/user` | POST | Creates user |
+| `api/user/login` | POST | Creates a new session |
+| `api/user/logout` | GET | Deletes session of the current user |
+| `api/user/current` | GET | Returns the current authenticated user along with their profile. This returns detail info about the user and their profile except the password hash. |
+| `api/user/<int:id>` | GET | Returns the user by the `id` provided. This returns limited information unless the requested person is friends with the user |
+| `api/user/<int:id>/unfriend` | PATCH | Removes the user from list of friends of the current user |
+| `api/user/<int:id>/posts` | POST | Returns a list of posts created by the given user ordered most recent first. Returns permission denied if the user is not self or a freind of the requesting user. |
+| `api/user/<str:search_text>` | GET | Returns a list of users and their profiles whoes usernames match the given `search_text`. This returns limited information. |
+| `api/request` | POST | Creates a new friend request, automactically registering the current user as the `sender`. |
+| `api/request/<int:id>/accept` | DELETE | Deletes the friend request and registers `sender` and the `receiver` as each other's friends. |
+| `api/request/<int:id>/reject` | DELETE | Deletes the friend request and does nothing else i.e. doesn't add the two people as each other's friends. |
+| `api/post` | POST, GET | If method is POST, creates a new post and registers current user as foreign key. If method is GET, returns all the posts created by the requesting user or their friends, ordered most recent first. |
+
+## Form handling and AJAX
 
 Being a single page application (SPA), the forms and other actions are submitted via AJAX as `application/json` in most cases, except where complex data such as files are submitted along with other info, in which case I submit the form as `multipart/form-data`.
 
@@ -144,7 +162,11 @@ In the frontend, the forms are handled using an excellent React.js library calle
 
 I have a custom `FormikInput` component at location `frontend/components` and in there I get the form input's `onChange` handlers and other details using a React hook called `useField`. This component then simply from the React context knows the form it is included in and lets the formik handle it state using `name` prop.
 
-Formik then calls appropriate methods I passdd into `useFormik` hook e.g. `onSubmit` based on user actions. 
+Formik then calls appropriate methods I passdd into `useFormik` hook e.g. `onSubmit` based on user actions.
+
+For forms that allow upload of files such the signup for which allows attaching a profile picture, because we have binary data, I transform the JavaScript object given to me by Formik into a `FormData` object that emulates the trandistional HTML forms and allows sending of the binary data.
+
+For doing the API calls (not just forms submission but AJAX calls in general), I have used custom methods `fetcher` and `fetcherSwr` located in `frontend/utils`. The latter is used with [SWR](https://swr.vercel.app/) a library that implements "stale while revalidate" pattern i.e. we display the cached values to the user while we refetch the fresh data. Please see `frontend/pages/index.tsx` for an example.
 
 ### Validation
 
@@ -314,7 +336,9 @@ For these tests to be pass, all the parts of the app must be running and integra
 
 There is room for a ton of improvements that could be made to the applications. These include area such as user experience, the architechture, performance, and code quality. Here are some ideas:
 
-1. The app still doesn't support a number of features that a basic social network is expected to provided. For example, ability to edit profile once signed up, edit posts, add images and other media to posts, retaining a history of messages in the database, ability to restrict the privacy of past posts, peer to peer messaging, etc.
+1. The app still doesn't support a number of features that a basic social network is expected to provided. For example, ability to edit profile once signed up, edit posts, add images and other media to posts, retaining a history of messages in the database, ability to restrict the privacy of past posts, fine-grained control over what information is shared with others, etc.
+
+1. The use of Websockets is limited. The chat functionally currently only supports a single public lobby that is accessible to any authenticated user. For a social network, it is expected that people will be able to direct message others. This is not currently implemented. Also when a user recieves a friend request, they don't received a notification in this regard, and we can use Django channels to build a simple notification system where users are informed about the activity related to their profile in realtime.
 
 1. While we have restricted the users to only see their own posts or their friends however the frontend still makes unnecessary calls to `/user/{id}/posts` endpoint even if the profile being viewed is not a friend of the user. This could be prevented by adding another check in the `useEffect()` hook.
 
@@ -322,7 +346,9 @@ There is room for a ton of improvements that could be made to the applications. 
 
 1. There are quite many TypeScript errors and warnings that need to be fixed by declaring the correct types. Also we have some console errors and warnings in the browser, which don't affect the functionality but should nevertheless be fixed because if we let the such errors and warnings build up, it will be difficult down the road to trace problems to their root causes and important errors may get difficult to find in a flood or errors in the console.
 
-1. The UI and user experince may be improved by displaying useful cues to the user about the application state. Since the app has so far only been tested locally, there didn't arise a huge need for things such as spinners because the server requests end up fulfilled instantly, however when deployed on a real server and accessed remotely, we need to display loading state e.g. when a friend request is being made to let the user know that their input is being processed, otherwise the user will continue clicking the button again and again. Similarly the form submit buttons should be disabled when a submission is in progress and so on.
+1. Currently most of endpoints are defined in `backend/app/urls.py` and while this currently works okay, it is not ideal as the app grows. Similar routes should therefore be moved to separate files and nested inside folders names that follow the routing. The use of `drf-nested-routers` should be considered.
+
+1. The UI and user experince may be improved by displaying useful cues to the user about the application state. Since the app has so far only been tested locally, there didn't arise a huge need for things such as spinners because the server requests end up fulfilled instantly, however when deployed on a real server and accessed remotely, we need to display loading state e.g. when a friend request is being made to let the user know that their input is being processed, otherwise the user will continue clicking the button again and again. Similarly the form submit buttons should be disabled when a submission is in progress and so on. For logout, I have used the Bootstrap's notice looking modal dialogue, however, in most other places I simply used the basic browser `alert` which is not very pleasant looking and doesn't allow us to apply any look an feel.
 
 ## Conclusion and self evaluation
 
