@@ -251,6 +251,8 @@ To do that I used different serializers
 I decided to focus on integration testing because our app has a lot of moving parts i.e. Django, Next.js and Redis. For this, I untilized
 Cypress.
 
+![Cypress testing screenshot](/final/readme/cypress.png)
+
 ## Possible improvements
 
 There is room for a ton of improvements that could be made to the applications. These include area such as user experience, the architechture, performance, and code quality. Here are some ideas:
