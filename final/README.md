@@ -67,6 +67,14 @@ docker run -p 6379:6379 redis
 
 To run redis locally without Docker, please follow [this guide](https://redis.io/topics/quickstart).
 
+#### Super user
+
+Currently the app doesn't function property if no superusers exists. Therefore please ensure there is a supersuer if running the app with a cleaned database.
+
+```bash
+python3 manage.py createsuperuser
+```
+
 ### Next.js
 
 Now that we have the backend running, we can turn our attention to the frontend app. Please keep the Django application running and open a new terminal instance and navigate to `/final/frontend`
@@ -90,6 +98,19 @@ This will install the Node.js packages needed to run the frontend application. N
 ```bash
 npm run dev
 ```
+
+## Test data
+
+The included sqlite database has the following users that maybe used to test the app.
+
+| Username  | Password   | Type |
+| ------- | ----------- | --
+| admin  | admin  | superuser
+| irfan | adminadmin 
+| hira | adminadmin
+| amna | adminadmin
+| arif | adminadmin
+
 
 ## Models and data structure
 

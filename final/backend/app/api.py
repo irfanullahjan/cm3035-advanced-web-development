@@ -26,6 +26,7 @@ class CreateUser(generics.CreateAPIView):
         serializer.validated_data.pop('is_active')
         super().perform_create(serializer)
 
+
 class UserLogin(APIView):
     def post(self, request):
         username = request.data.get("username")
@@ -73,8 +74,25 @@ class UserById(generics.RetrieveAPIView):
             # if the user is requesting their own profile, return the full serializer
             return UserSerializer
 
+        # if user is a friend, return the full serializer
+        if self.request.user.profile.friends.filter(id=self.kwargs['id']).exists():
+            return UserSerializer
+
         # otherwise, return a restricted serializer
         return UserSerializerRestricted
+
+
+class UnfriendByUserId(APIView):
+    def patch(self, request, id):
+        # get profile by user id
+        profile = Profile.objects.get(user_id=id)
+
+        # if the user is not a friend, return error
+        if not request.user.profile.friends.filter(id=profile.id).exists():
+            return JsonResponse({'error': 'User is not a friend'}, status=400)
+
+        request.user.profile.friends.remove(profile)
+        return JsonResponse({'success': 'Successfully unfriended'})
 
 
 class FindUsersByUsername(generics.ListAPIView):
@@ -88,7 +106,6 @@ class FindUsersByUsername(generics.ListAPIView):
 
     def get_queryset(self):
         search_text = self.kwargs['search_text']
-        print('search_text', search_text)
 
         # return all users whose username contains the search text excluding the current user and superusers
         return User.objects.filter(username__icontains=search_text).exclude(id=self.request.user.id).exclude(is_superuser=True)
@@ -103,7 +120,8 @@ class UserPosts(generics.ListAPIView):
     serializer_class = PostSerializer
 
     def get_queryset(self):
-        userposts = Post.objects.filter(user=self.kwargs['id']).order_by('-created_at')
+        userposts = Post.objects.filter(
+            user=self.kwargs['id']).order_by('-created_at')
 
         # if the current user is the owner
         if self.request.user.id == self.kwargs['id']:
@@ -117,6 +135,8 @@ class UserPosts(generics.ListAPIView):
         self.permission_denied(self.request)
 
 # friends by user id
+
+
 class UserFriends(generics.ListAPIView):
     model = User
     permission_classes = [
@@ -197,6 +217,7 @@ class AcceptFriendRequest(generics.DestroyAPIView):
 
     def get_queryset(self):
         return FriendRequest.objects.filter(receiver=self.request.user)
+
 
 class RejectFriendRequest(generics.DestroyAPIView):
     model = FriendRequest

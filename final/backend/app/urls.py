@@ -7,6 +7,7 @@ urlpatterns = [
     path('api/user/logout', api.UserLogout.as_view(), name='user-logout'),
     path('api/user/current', api.CurrentUser.as_view(), name='user-get-current'),
     path('api/user/<int:id>', api.UserById.as_view(), name='user-by-id'),
+    path('api/user/<int:id>/unfriend', api.UnfriendByUserId.as_view(), name='unfriend-by-user-id'),
     path('api/user/<int:id>/posts', api.UserPosts.as_view(), name='user-posts'),
     path('api/user/<str:search_text>', api.FindUsersByUsername.as_view(), name='find-users-by-search-text'),
     path('api/request', api.CreateFriendRequest.as_view(), name='friend-request'),

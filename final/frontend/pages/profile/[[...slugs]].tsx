@@ -10,6 +10,7 @@ import {
 } from "~utils/formatters";
 import { Post } from "~components/Post";
 import { fetcher } from "~utils/fetcher";
+import Image from "next/image";
 
 const title = "User Profile";
 
@@ -51,7 +52,7 @@ export default function Profile() {
           setUserPosts(data);
         });
     }
-  }, [id]);
+  }, [id, user]);
 
   if (!user)
     return (
@@ -62,20 +63,26 @@ export default function Profile() {
     );
 
   const unfriend = () => {
-    fetcher(`/api/user/${id}/unfriend`, {
-      method: "DELETE",
-    }).then((res) => {
-      if (res.status === 200) {
+    if (confirm(`Are you sure you want to unfriend ${userDetail.username}?"`)) {
+      fetcher(`/api/user/${id}/unfriend`, {
+        method: "PATCH",
+      }).then(() => {
         updateSession();
-      } else {
-        console.log("Error unfriending user");
-      }
-    });
+      });
+    }
   };
 
   return (
     <>
       <h1>Profile</h1>
+      {userDetail?.profile.avatar && (
+        <Image
+          src={userDetail?.profile.avatar}
+          width={200}
+          height={200}
+          alt="avatar"
+        />
+      )}
       {userDetail && (
         <Table>
           <tbody>
@@ -118,21 +125,19 @@ export default function Profile() {
           </tbody>
         </Table>
       )}
-      {/* show friend or unfriend button */}
-      {user.profile.friends.find((friend) => friend.id === +id) ? (
-        <Button color="danger" className="mb-3">
+      {/* show unfriend button */}
+      {user.profile.friends.find((friend) => friend.id === +id) && (
+        <Button color="danger" className="mb-3" onClick={unfriend}>
           Unfriend
         </Button>
-      ) : (
-        user.id !== id && (
-          <Button color="primary" className="mb-3">
-            Friend
-          </Button>
-        )
       )}
       {userPosts?.length > 0 && (
         <>
-          {userDetail?.id === user.id ? <h2>My Posts</h2> : <h2>{userDetail.first_name}'s Posts</h2>}
+          {userDetail?.id === user.id ? (
+            <h2>My Posts</h2>
+          ) : (
+            <h2>{userDetail?.first_name}'s Posts</h2>
+          )}
           {userPosts.map((post) => (
             <Post key={post.id} post={post} />
           ))}

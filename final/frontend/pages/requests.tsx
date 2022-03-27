@@ -8,8 +8,8 @@ import { getGenderName } from "~utils/formatters";
 export default function Requests() {
   const { user, updateSession } = useContext(SessionContext);
 
-  const acceptRequest = (id: string) => {
-    fetcher(`/api/request/${id}/accept`, {
+  const handleRequest = (id: string, accept: boolean) => {
+    fetcher(`/api/request/${id}/${accept ? "accept" : "reject" }`, {
       method: "DELETE",
     }).then((res) => {
       if (res.status === 204) {
@@ -50,7 +50,10 @@ export default function Requests() {
                 <td>{sender.username}</td>
                 <td>{getGenderName(sender.profile.gender)}</td>
                 <td>
-                  <Button onClick={() => acceptRequest(id)} color="primary">Accept</Button>
+                  <Button onClick={() => handleRequest(id, true)} color="primary">Accept</Button>
+                </td>
+                <td>
+                  <Button onClick={() => handleRequest(id, false)} color="danger">Reject</Button>
                 </td>
               </tr>
             ))}

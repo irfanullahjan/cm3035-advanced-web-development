@@ -7,7 +7,6 @@ import { FormikInput } from "~components/FormikInput";
 import { genderCodeGroup } from "~constants/codeGroups";
 import { SessionContext } from "~pages/_app";
 import { fetcher } from "~utils/fetcher";
-import { formatDayMonth, getAgeInYears } from "~utils/formatters";
 
 const title = "Find friends";
 
@@ -88,6 +87,7 @@ export default function Friends() {
                 <th>Username</th>
                 <th>Gender</th>
                 <th />
+                <th />
               </tr>
             </thead>
             <tbody>
@@ -105,6 +105,9 @@ export default function Friends() {
                       }
                     </td>
                     <td>
+                      <Link href={`/profile/${result.id}`}>View Profile</Link>
+                    </td>
+                    <td>
                       {user.profile.friends.find(
                         (friend) => friend.id === result.id
                       ) ? (
@@ -112,7 +115,7 @@ export default function Friends() {
                       ) : user.friend_requests_sent.find(
                           (request) => request.receiver.id === result.id
                         ) ? (
-                        "Request already sent"
+                        "Request sent"
                       ) : (
                         <Button onClick={() => sendFriendRequest(result.id)}>
                           Send Friend Request
@@ -145,8 +148,8 @@ export default function Friends() {
             <thead>
               <tr>
                 <th>Name</th>
-                <th>Birthday</th>
-                <th>Email</th>
+                <th>Username</th>
+                <th>Gender</th>
                 <th />
               </tr>
             </thead>
@@ -154,8 +157,14 @@ export default function Friends() {
               {friends.map((friend) => (
                 <tr key={friend.id}>
                   <td>{`${friend.user.first_name} ${friend.user.last_name}`}</td>
-                  <td>{formatDayMonth(friend.birthday)}</td>
-                  <td>{friend.user.email}</td>
+                  <td>{friend.user.username}</td>
+                  <td>
+                    {
+                      genderCodeGroup.find(
+                        (g) => g.value === friend.user.profile?.gender
+                      )?.name
+                    }
+                  </td>
                   <td>
                     <Link href={`/profile/${friend.user.id}`}>
                       View Profile

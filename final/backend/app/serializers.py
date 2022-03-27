@@ -7,7 +7,7 @@ from .models import *
 class UserSerializerRestricted_Profile(serializers.ModelSerializer):
     class Meta:
         model = Profile
-        fields = ('id', 'gender')
+        fields = ('id', 'gender', 'avatar')
 
 
 class UserSerializerRestricted(serializers.ModelSerializer):
