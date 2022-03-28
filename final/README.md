@@ -281,6 +281,8 @@ Initially I used JSON Web Token (JWT) authentication based on [Simple JWT](https
 
 While, I could have embedded the user details within the stringified message sent via Websocket, giving frontend that much control is not considered secure and obtaining the user from the request scope is way more safe because then it is difficult for a user to disguise themselves as being another user sending the message.
 
+<div style="page-break-after: always;"></div>
+
 ## Frontend navigation, layout and authentication
 
 On the frontend, Next.js handles the routing between pages beautifully. It has this concept of pages that reside at `frontend/pages` and Next.js scans this directory on app startup and registers routes based on the file and folder paths. It looks for default exported JSX components and treats them as pages. So if we have such a component located at `frontend/pages/login.tsx` it will be accessible as a page at the URL of `/login`. Next.js also supports [dynamic routes](https://nextjs.org/docs/routing/dynamic-routes) which I have used for Profile page.
