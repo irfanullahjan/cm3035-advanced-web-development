@@ -2,19 +2,21 @@
 
 ## Introduction
 
-This report explains the course work project and discusses the tools and techniques used and how to get the application running.
+In this coursework project, I designed and developed a miniature social media network which allows people to signup, login, logout, add other people as friends, post status updates and chat with other users in realtime in a public lobby. This report explains the application and discusses the tools and techniques used and how to get it running.
 
 ## Tools
 
-The backend is built with **Django**, a backend focused web framework written in Python. Django has advanced set of tools for designing backend APIs including routing, Models, ORM, Database auto migrations and more. I used Django Rest Framework for API endpoints.
+The backend is built with [Django](https://www.djangoproject.com/), a backend focused web framework written in Python. Django has advanced set of tools for designing backend APIs including routing, Models, ORM, Database auto migrations and more. I used [Django Rest Framework](https://www.django-rest-framework.org/) (DRF) for REST API endpoints.
 
-In order for the chat functionality to work, a **Redis** server must be running on localhost at port 6379. This may be configured at `/backend/settings.py`.
+Chat functionality has been added via [Django Channels](https://channels.readthedocs.io/en/stable/). In order for the chat functionality to work, a [Redis](https://redis.io/) server must be running on localhost at port 6379. This may be configured at `/backend/settings.py`.
 
-Even though Django supports frontend views as well through its powerful templating mechanism, I opted for **Next.js** as the frontend framework because it enables us to develop highly interactive single page applications.
+Even though Django supports frontend views as well through its powerful templating mechanism, I opted for [Next.js](https://nextjs.org/) as the frontend framework because it enables us to develop highly interactive single page applications.
 
-Next.js is built on top of other powerful JavaScript technologies including React.js, Express.js and Webpack. This enables it to perform server-side rendering of React.js components and pages, file and directory-based routing, code-splitting as well built-in support for REST API even though we haven’t used this last feature.
+Next.js is built on top of other powerful JavaScript technologies including [React.js](https://reactjs.org/), [Express.js](https://expressjs.com/) even though I am not using backend API functionality in Next.js because the backend is made with Django and DRF. Next.js server side functionality enables it to perform server-side rendering of React.js components and pages, file and directory-based routing, code-splitting as well built-in support for REST API even though we haven’t used this last feature.
 
-As mentioned above, Next.js is based **React.js** which is an open-source frontend framework built by Facebook and it provides an ingenious way to mix up frontend layout structures along with the related JavaScript logic into components using a special syntax called JSX. You can think of it like HTML that is written inside JavaScript files. These React.js components help keep the frontend code cleanly organized because all the relevant logic resides directly along with the relevant UI markup.
+As mentioned above, Next.js is based on React.js which is an open-source frontend framework built by Facebook and it provides an ingenious way to mix up frontend layout structures along with the related JavaScript logic into components using a special syntax called JSX. You can think of it like HTML that is written inside JavaScript files. These React.js components help keep the frontend code cleanly organized because all the relevant logic resides directly along with the relevant UI markup.
+
+I chose [TypeScript](https://www.typescriptlang.org/) instead of normal JavaScript for Next.js because it is strongly typed and allows type annotations which are helpful in minimizing the errors by detecting issues are compile time.
 
 ## Directory and code structure
 
@@ -39,7 +41,7 @@ To run the whole application, we need to separately run Django backend, a Redis 
 
 ### Django
 
-In development we can use the development server built into Django. But first we need to ensure Python 3 is installed and working. To check, please run the following in your terminal:
+In development we can use the development server built into Django. But first we need to ensure [Python 3](https://www.python.org/downloads/) is installed and working. To check, please run the following in your terminal:
 
 ```bash
 python3 --version
@@ -295,7 +297,7 @@ To do that, I used different serializers e.g. `UserSerializer` for detailed info
 
 ## Tests
 
-I decided to focus on integration testing because our app has a lot of moving parts i.e. Django, Next.js and Redis. For this, I untilized Cypress. It is a library that can be used to automate the user actions e.g. clicks, form inputs etc. and these tests ensure that the application is behaving as expected and any functionality does not break down upon changes to other features.
+I decided to focus on integration testing because our app has a lot of moving parts i.e. Django, Next.js and Redis. For this, I utilized [Cypress](https://www.cypress.io/). It is a library that can be used to automate the user actions e.g. clicks, form inputs etc. and these tests ensure that the application is behaving as expected and any functionality does not break down upon changes to other features.
 
 The following screenshot, for example, shows how the logout functionality is tested: 
 
@@ -338,10 +340,14 @@ npm run cypress
 
 For these tests to be pass, all the parts of the app must be running and integrated together, so plase ensure both the backend and the frontend app are running in the same environemnt and also Redis if chat tests are included in the test suite.
 
+## Version control
+
+Even though I didn't release any versions yet, I used [Git](https://git-scm.com/) to keep a history of changes to the codebase. Since I was the only one developing the application, I didn't create separate branches and merge requests and instead directly made changes in the `main` branch. A log of my changes may be obtained by running `git log` in terminal. Please note that this same Git repository also contains my midterm coursework.
+
 ## Possible improvements
 
 There is room for a ton of improvements that could be made to the applications. These include area such as user experience, the architechture, performance, and code quality. Here are some ideas:
-
+1. translations
 1. The app still doesn't support a number of features that a basic social network is expected to provided. For example, ability to edit profile once signed up, edit posts, add images and other media to posts, retaining a history of messages in the database, ability to restrict the privacy of past posts, fine-grained control over what information is shared with others, etc.
 
 1. The use of Websockets is limited. The chat functionally currently only supports a single public lobby that is accessible to any authenticated user. For a social network, it is expected that people will be able to direct message others. This is not currently implemented. Also when a user recieves a friend request, they don't received a notification in this regard, and we can use Django channels to build a simple notification system where users are informed about the activity related to their profile in realtime.
@@ -356,12 +362,47 @@ There is room for a ton of improvements that could be made to the applications. 
 
 1. The UI and user experince may be improved by displaying useful cues to the user about the application state. Since the app has so far only been tested locally, there didn't arise a huge need for things such as spinners because the server requests end up fulfilled instantly, however when deployed on a real server and accessed remotely, we need to display loading state e.g. when a friend request is being made to let the user know that their input is being processed, otherwise the user will continue clicking the button again and again. Similarly the form submit buttons should be disabled when a submission is in progress and so on. For logout, I have used the Bootstrap's notice looking modal dialogue, however, in most other places I simply used the basic browser `alert` which is not very pleasant looking and doesn't allow us to apply any look an feel.
 
+1. The images are uploaded to a single directory with the original file names. To prevent name conflicts these should ideally be assigned unique ids and stored with the unique names. I am not sure if Django will automically handly naming conflicts though, and it would be nice if it did so.
+
+1. While I tried to follow secure programming, I feel that there are a lot of loopholes in this code base and should be thoroughtly reviewed and patched to ensure it doesn't break easilty on undesired user input. All the data and especialty thet which going to be saved in the database should be properly sanitized. Even thought Django should be doing quite a good job at this due to the models we defined, I still feel that more work is needed in this area. One small example is the password validation: The frontend simply validates it for length of characters however the backend has more robust rules. Ideally, the frontend should match the rules in the backend to ensure that form submission doesn't break unexpectedly.
+
 ## Conclusion and self evaluation
 
 Throughout this project, I faced challenges that at times were almost frustrating but finding solutions for those issues helped me learn new concepts and new ways to handle those scenarious. Django and Django Rest Framework (DRF) have proved to be really really powerful tools and an excellent framework for web development. I must say that DRF abstracts away a lot of the data flow and even thought it makes it a bit difficult to learn, this also makes it quite powerful in terms of how much we can achieve with so little code.
 
 I am specially fond of how we can use different serializers to control how much information from the same model so show to different groups of users. I am still curious about whether DRF and Django automatically optimizes the database queries when e.g. we only take a subset of fields from the model, and I hope to investigate this e.g. using Django toolbar.
 
-Regarding my performance in this project, I beleive due to the breadth of this application with all its backend and frontend logic, I got a bit disoriented due to lack of detailed planning. This meant that I couldn't focus on the core feacher that I needed to do. It would have been a lot better if I did those really really well and polished them. Instead I jumped around between different features and even though the app does quite many things, and the APIs are quite detailed with different layers of permissions, there are a lot of places, where the app has been left unfinished.
+Regarding my performance in this project, I beleive due to the broad scope of this project and the complexity of the application with all its backend and frontend logic, I got a bit disoriented due to lack of detailed planning. This meant that I couldn't focus on the core feacher that I needed to do. It would have been a lot better if I did those really really well and polished them. Instead I jumped around between different features and even though the app does quite many things, and the APIs are quite detailed with different layers of permissions, there are a lot of places, where the app has been left unfinished.
+
+Also, the testing has been quite limited so far with no user testing and feedback at all. While I am satisfied with the way I implemented testing with Cypress, I beleive I should have also done some level of unit testing to ensure the API endpoints function as expected and unit tests may also be written for the frontend React.js components.
+
+So far, I have only been able to test it on the development server included with Django. In real world deployment, we will be running it in a production environment server for the best performance and security and therefore must be tested well in production mode before deployment.
 
 One very import lession I learned with respect to software development in general is to always throw detailed errors if something can't to processed, never to "eat up" the errors. This is because otherwise the developer using your library will have a really difficult time figuring out what is wrong. Case in point: I had an issue where the backed would return a 400 Bad Request response without any error in the logs. I even turned on details errors in Django app settings but it turned out the issue was at a layer a cbove Django app itself, actually Django Channels itself was rejected the request because the error boundry with my request of type `multipart/form-data` was malformated. Since, the Bad Request response wasn't acompanies by an error message, I had a really hard time resolving this one issue.
+
+## Resources
+
+1. [Django](https://www.djangoproject.com/),
+1. [Django Rest Framework](https://www.django-rest-framework.org/)
+1. [Django Channels](https://channels.readthedocs.io/en/stable/)
+1. [Redis](https://redis.io/)
+1. [Next.js](https://nextjs.org/)
+1. [React.js](https://reactjs.org/)
+1. [Express.js](https://expressjs.com/)
+1. [TypeScript](https://www.typescriptlang.org/)
+1. [Python 3](https://www.python.org/downloads/)
+1. [Python virtual environment](https://docs.python.org/3/library/venv.html)
+1. [Redis quickstart](https://redis.io/topics/quickstart)
+1. [Node.js](https://nodejs.org/)
+1. [Formik](https://formik.org/)
+1. [React Context](https://reactjs.org/docs/context.html)
+1. [React Hooks](https://reactjs.org/docs/hooks-intro.html)
+1. [SWR](https://swr.vercel.app/)
+1. [Simple JWT](https://django-rest-framework-simplejwt.readthedocs.io/en/latest/)
+1. [Next.js dynamic routes](https://nextjs.org/docs/routing/dynamic-routes)
+1. [Reactstrap](https://reactstrap.github.io/)
+1. [Bootstrap](https://getbootstrap.com/)
+1. [Sass](https://sass-lang.com/)
+1. [Bootsrap using Sass](https://getbootstrap.com/docs/5.0/customize/sass/)
+1. [Cypress](https://www.cypress.io/)
+1. [Git](https://git-scm.com/)

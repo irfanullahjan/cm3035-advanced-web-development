@@ -208,6 +208,7 @@ export default function Signup() {
           <input
             name="profile.avatar"
             type="file"
+            accept="image/*"
             onChange={(event) => {
                 formik.setFieldValue("profile.avatar", event.target.files?.[0]);
             }}
